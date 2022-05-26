@@ -1,0 +1,139 @@
+/* This file overwrites css from the base ckan theme */
+
+
+/* helpers */
+.inline-block {
+	display: inline-block !important;
+}
+
+
+/* remove bar & replace with padding */
+.homepage [role=main] {
+	padding: 0;
+}
+
+.main,
+.hero {
+	padding-top: 20px;
+	background: #e8ecee;
+}
+
+#NavbarBrandingContainer {
+	position: absolute;
+	margin-bottom: -50px;
+}
+
+#NavbarLogo {
+	background-color: white;
+	padding: 3px;
+	border-radius: 3px;
+	box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 12px;
+	height: 130px;
+}
+
+#NavbarHeadingContainer {
+	margin-left: 5px;
+}
+
+#NavbarHeading1,
+#NavbarHeading2 {
+	font-weight: normal;
+}
+
+#NavbarHeading1,
+#NavbarHeading1 :hover{
+	color: white;
+}
+
+#NavbarHeading2 {
+	color: #990005;
+}
+
+.fluid-white-bar {
+	background-color: white;
+	height: 80px;
+	border-bottom: solid 5px #990005;
+}
+
+
+/* mobile */
+@media only screen and (max-width: 768px) {
+	#NavbarHeadingContainer {
+		margin-top: 12px;
+	}
+	#NavbarLogo {
+		margin-top: -90px;
+	}
+	#NavbarHeading1,
+	#NavbarHeading2 {
+		font-size: 24px;
+		padding: 5px;
+		border-radius: 3px;
+	}
+	#NavbarHeading2 {
+		background-color: white;
+	}
+	.masthead .navbar-collapse {
+		margin-top: 140px;
+	}
+}
+
+
+/* tablet */
+@media only screen and (min-width: 768px) {
+	#NavbarHeadingContainer {
+		margin-top: 28px;
+	}
+	#NavbarLogo {
+		margin-top: -55px;
+	}
+	#NavbarHeading1,
+	#NavbarHeading2 {
+		font-size: 18px;
+	}
+	.nav>li>a {
+		padding: 5px 7.5px;
+	}
+}
+
+
+/* medium devices */
+@media only screen and (min-width: 992px) {
+	#NavbarHeadingContainer {
+		margin-top: 33px;
+	}
+	#NavbarLogo {
+		margin-top: -70px;
+	}
+	#NavbarHeading1,
+	#NavbarHeading2 {
+		font-size: 18px;
+	}
+	.nav>li>a {
+		padding: 5px 7.5px;
+	}
+	.masthead .site-search input {
+		margin-top: -5px;
+	}
+}
+
+
+/* desktop */
+@media only screen and (min-width: 1200px) {
+	#NavbarHeadingContainer {
+		margin-top: 30px;
+	}
+	#NavbarLogo {
+		margin-top: -80px;
+	}
+	#NavbarHeading1,
+	#NavbarHeading2 {
+		font-size: 24px;
+	}
+	.nav>li>a {
+		padding: 10px 15px;
+	}
+	.masthead .site-search input {
+		margin-top: 0;
+	}
+}

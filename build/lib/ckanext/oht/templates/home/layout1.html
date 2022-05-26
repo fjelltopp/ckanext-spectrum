@@ -1,0 +1,44 @@
+<div role="main">
+    <div class="main hero">
+      <div class="container">
+        <div class="row row1">
+          <div class="col-md-6 col1">
+            {% block promoted %}
+              {% snippet 'home/snippets/promoted.html' %}
+            {% endblock %}
+          </div>
+          <div class="col-md-6 col2">
+            {% block stats %}
+                {% snippet 'home/snippets/stats.html' %}
+            {% endblock %}
+            <br>
+            {% block search %}
+              {% snippet 'home/snippets/search.html' %}
+            {% endblock %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="main">
+      <div class="container">
+        <div class='row row1'>
+          <div class="col-lg-offset-4" style="margin-bottom: 50px;">
+            <a class="btn btn-primary btn-lg guidance-button" href="/pages/dhamis-analytics">
+              <i class="fa fa-info-circle"></i>
+              <span class="button-text">DHAMIS Analytics Dashboard</span>
+            </a>
+          </div>
+        </div>
+        <div class="row row2">
+          {% set groups = h.get_featured_groups(count=10) %}
+          {% for group in groups %}
+            <div class="col-md-6">
+              <div class="box">
+                {% snippet 'snippets/group_item.html', group=group, truncate=50, truncate_title=35 %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>

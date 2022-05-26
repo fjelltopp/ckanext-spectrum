@@ -1,3 +1,18 @@
+Metadata-Version: 2.1
+Name: ckanext-oht
+Version: 0.0.1
+Summary: Project for CKAN customizations for Avenir Health's One Health Tool Data Repository
+Home-page: https://github.com/fjelltopp/ckanext-oht
+Author: Jonathan Berry
+Author-email: jonathan@fjelltopp.org
+License: AGPL
+Keywords: CKAN
+Classifier: Development Status :: 4 - Beta
+Classifier: License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)
+Classifier: Programming Language :: Python :: 3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
 [![Tests](https://github.com/fjelltopp/ckanext-oht/workflows/Tests/badge.svg?branch=main)](https://github.com/fjelltopp/ckanext-oht/actions)
 
 # ckanext-oht
