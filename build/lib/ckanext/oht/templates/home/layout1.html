@@ -17,28 +17,7 @@
             {% endblock %}
           </div>
         </div>
-      </div>
-    </div>
-    <div class="main">
-      <div class="container">
-        <div class='row row1'>
-          <div class="col-lg-offset-4" style="margin-bottom: 50px;">
-            <a class="btn btn-primary btn-lg guidance-button" href="/pages/dhamis-analytics">
-              <i class="fa fa-info-circle"></i>
-              <span class="button-text">DHAMIS Analytics Dashboard</span>
-            </a>
-          </div>
-        </div>
-        <div class="row row2">
-          {% set groups = h.get_featured_groups(count=10) %}
-          {% for group in groups %}
-            <div class="col-md-6">
-              <div class="box">
-                {% snippet 'snippets/group_item.html', group=group, truncate=50, truncate_title=35 %}
-              </div>
-            </div>
-          {% endfor %}
-        </div>
+        <div class="row" style="height:10vh">
       </div>
     </div>
   </div>
