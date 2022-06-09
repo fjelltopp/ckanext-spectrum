@@ -1,0 +1,55 @@
+scheming_version: 2
+dataset_type: list
+about: A customized dataset schema for LiST Projections.
+about_url: http://github.com/ckan/ckanext-scheming
+
+
+dataset_fields:
+
+- field_name: title
+  label: Projection Title
+  preset: title
+  form_placeholder: eg. A descriptive title
+
+- field_name: name
+  label: URL
+  preset: dataset_slug
+  form_placeholder: eg. my-dataset
+
+- field_name: start_year
+  label: Year
+  validators: ignore_missing int_validator
+  form_placeholder: eg. 2012
+
+- field_name: end_year
+  label: Year
+  validators: ignore_missing int_validator
+  form_placeholder: eg. 2022
+
+- field_name: tag_string
+  label: Tags
+  preset: tag_string_autocomplete
+  form_placeholder: eg. economy, mental health, government
+
+- field_name: country_code
+  label: Country Code
+  form_placeholder: USA
+
+- field_name: notes
+  label: Notes
+  form_snippet: markdown.html
+  form_placeholder: eg. Some useful notes about the data
+
+
+resource_fields:
+
+- field_name: url
+  label: URL
+  preset: resource_url_upload
+
+- field_name: name
+  label: Name (Module ID)
+
+- field_name: format
+  label: Format
+  preset: resource_format_autocomplete
