@@ -6,7 +6,7 @@ from ckan.plugins import toolkit
 
 
 @pytest.mark.ckan_config("ckan.plugins", "oht scheming_datasets")
-@pytest.mark.usefixtures("with_plugins")
+@pytest.mark.usefixtures("with_plugins", "clean_db")
 class TestAuth():
 
     def setup(self):
@@ -33,6 +33,7 @@ class TestAuth():
 
     def test_users_cant_see_other_users_datasets(self):
         with pytest.raises(toolkit.NotAuthorized):
+
             call_action(
                 'package_show',
                 get_context(self.user_1),
