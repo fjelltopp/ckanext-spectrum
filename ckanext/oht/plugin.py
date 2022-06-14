@@ -95,7 +95,9 @@ def _package_update_auth_function(context, data_dict):
     if user_obj:
         is_editor_collaborator = (
             authz.check_config_permission('allow_dataset_collaborators') and
-            authz.user_is_collaborator_on_dataset(user_obj.id, package.id, ['admin', 'editor'])
+            authz.user_is_collaborator_on_dataset(
+                user_obj.id, package.id, ['admin', 'editor']
+            )
         )
         is_dataset_creator = user_obj.id == package.creator_user_id
 
