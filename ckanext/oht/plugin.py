@@ -6,20 +6,26 @@ import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 import ckan.lib.uploader as uploader
 import ckanext.blob_storage.helpers as blobstorage_helpers
+import ckan.logic.auth as logic_auth
+from ckan.logic.auth.get import package_show
+from ckan.lib.plugins import DefaultPermissionLabels
 from giftless_client import LfsClient
 from werkzeug.datastructures import FileStorage as FlaskFileStorage
 from ckanext.oht.helpers import (
     get_dataset_from_id, get_facet_items_dict
 )
 
+
 log = logging.getLogger(__name__)
 
 
-class OHTPlugin(plugins.SingletonPlugin):
+class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.IFacets, inherit=True)
     plugins.implements(plugins.ITemplateHelpers)
     plugins.implements(plugins.IResourceController, inherit=True)
+    plugins.implements(plugins.IPermissionLabels)
+    plugins.implements(plugins.IAuthFunctions)
 
     # ITemplateHelpers
     def get_helpers(self):
@@ -58,6 +64,38 @@ class OHTPlugin(plugins.SingletonPlugin):
             _giftless_upload(context, resource, current=current)
             _update_resource_last_modified_date(resource, current=current)
         return resource
+
+    def get_dataset_labels(self, dataset_obj):
+        """
+        Stops private datasets from being visible to other members of the
+        same organisation. Only the creator and collaborators can see them.
+        """
+        labels = super(OHTPlugin, self).get_dataset_labels(dataset_obj)
+
+        if dataset_obj.owner_org:
+            labels.remove(u'member-%s' % dataset_obj.owner_org)
+            labels.append(u'creator-%s' % dataset_obj.creator_user_id)
+
+        return labels
+
+    def get_auth_functions(self):
+        return {
+            'package_update': _package_update_auth_function
+        }
+
+
+@toolkit.chained_auth_function
+def _package_update_auth_function(next_auth_function, context, data_dict):
+    user = context.get('user')
+    package = logic_auth.get_package_object(context, data_dict)
+    if not package_show(context, data_dict)['success']:
+        return {
+            'success': False,
+            'msg': toolkit._('User {} not authorized to view package {}').format(
+                user, package.id
+            )
+        }
+    return next_auth_function(context, data_dict)
 
 
 def _giftless_upload(context, resource, current=None):
