@@ -73,8 +73,8 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         labels = super(OHTPlugin, self).get_dataset_labels(dataset_obj)
 
         if dataset_obj.owner_org:
-            labels.remove(u'member-%s' % dataset_obj.owner_org)
-            labels.append(u'creator-%s' % dataset_obj.creator_user_id)
+            labels.remove(f'member-{dataset_obj.owner_org}')
+            labels.append(f'creator-{dataset_obj.creator_user_id}')
 
         return labels
 
@@ -91,9 +91,7 @@ def _package_update_auth_function(next_auth_function, context, data_dict):
     if not package_show(context, data_dict)['success']:
         return {
             'success': False,
-            'msg': toolkit._('User {} not authorized to view package {}').format(
-                user, package.id
-            )
+            'msg': toolkit._(f'User {user} not authorized to view package {package.id}')
         }
     return next_auth_function(context, data_dict)
 
