@@ -36,7 +36,7 @@ class TestAuth():
             user=self.user_2
         )
 
-    def test_users_cant_see_other_users_datasets(self):
+    def test_users_cant_see_other_users_private_datasets(self):
 
         with pytest.raises(toolkit.NotAuthorized):
             call_auth(
@@ -52,7 +52,7 @@ class TestAuth():
                 id=self.dataset_1['id']
             )
 
-    def test_users_cant_edit_other_users_datasets(self):
+    def test_users_cant_edit_other_users_private_datasets(self):
 
         with pytest.raises(toolkit.NotAuthorized):
             call_auth(
