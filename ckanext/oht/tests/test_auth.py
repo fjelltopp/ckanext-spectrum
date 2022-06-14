@@ -5,7 +5,7 @@ from ckanext.oht.tests import get_context
 from ckan.plugins import toolkit
 
 
-@pytest.mark.ckan_config("ckan.plugins", "oht scheming_datasets")
+@pytest.mark.ckan_config("ckan.plugins", "oht")
 @pytest.mark.usefixtures("with_plugins", "clean_db")
 class TestAuth():
 
@@ -22,13 +22,13 @@ class TestAuth():
             owner_org=self.org['id'],
             type='oht',
             private=True,
-            creator_user_id=self.user_1['id']
+            creator_user_id=self.user_1['id'],
         )
         self.dataset_2 = factories.Dataset(
             owner_org=self.org['id'],
             type='oht',
             private=True,
-            creator_user_id=self.user_2['id']
+            creator_user_id=self.user_2['id'],
         )
 
     def test_users_cant_see_other_users_datasets(self):
@@ -48,5 +48,19 @@ class TestAuth():
             )
 
     def test_editors_cant_edit_other_users_datasets(self):
-        # TODO:
-        pass
+
+        with pytest.raises(toolkit.NotAuthorized):
+            call_action(
+                'package_patch',
+                get_context(self.user_1),
+                id=self.dataset_2['id'],
+                title="Changed Title"
+            )
+
+        with pytest.raises(toolkit.NotAuthorized):
+            call_action(
+                'package_patch',
+                get_context(self.user_1),
+                id=self.dataset_2['id'],
+                title="Changed Title"
+            )
