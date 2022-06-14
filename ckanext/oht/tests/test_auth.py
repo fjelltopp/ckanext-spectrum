@@ -5,7 +5,7 @@ from ckanext.oht.tests import get_context
 from ckan.plugins import toolkit
 
 
-@pytest.mark.usefixtures("with_plugins", "clean_db")
+@pytest.mark.usefixtures("clean_db")
 class TestAuth():
 
     def setup(self):
