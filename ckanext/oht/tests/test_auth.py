@@ -1,11 +1,10 @@
 import pytest
 from ckan.tests import factories
-from ckan.tests.helpers import call_action
+from ckan.tests.helpers import call_auth, call_action
 from ckanext.oht.tests import get_context
 from ckan.plugins import toolkit
 
 
-@pytest.mark.ckan_config("ckan.plugins", "oht")
 @pytest.mark.usefixtures("with_plugins", "clean_db")
 class TestAuth():
 
@@ -22,45 +21,94 @@ class TestAuth():
             owner_org=self.org['id'],
             type='oht',
             private=True,
-            creator_user_id=self.user_1['id'],
+            user=self.user_1
         )
         self.dataset_2 = factories.Dataset(
             owner_org=self.org['id'],
             type='oht',
             private=True,
-            creator_user_id=self.user_2['id'],
+            user=self.user_2
         )
 
     def test_users_cant_see_other_users_datasets(self):
+
         with pytest.raises(toolkit.NotAuthorized):
 
-            call_action(
+            call_auth(
                 'package_show',
                 get_context(self.user_1),
                 id=self.dataset_2['id']
             )
 
         with pytest.raises(toolkit.NotAuthorized):
-            call_action(
+            call_auth(
                 'package_show',
                 get_context(self.user_2),
                 id=self.dataset_1['id']
             )
 
-    def test_editors_cant_edit_other_users_datasets(self):
+    def test_users_cant_edit_other_users_datasets(self):
 
         with pytest.raises(toolkit.NotAuthorized):
-            call_action(
-                'package_patch',
+            call_auth(
+                'package_update',
                 get_context(self.user_1),
-                id=self.dataset_2['id'],
-                title="Changed Title"
+                id=self.dataset_2['id']
             )
 
         with pytest.raises(toolkit.NotAuthorized):
-            call_action(
-                'package_patch',
+            call_auth(
+                'package_update',
                 get_context(self.user_1),
-                id=self.dataset_2['id'],
-                title="Changed Title"
+                id=self.dataset_2['id']
             )
+
+    def test_users_can_edit_own_datasets(self):
+        assert call_auth(
+            'package_update',
+            get_context(self.user_1),
+            id=self.dataset_1['id']
+        )
+        assert call_auth(
+            'package_update',
+            get_context(self.user_2),
+            id=self.dataset_2['id']
+        )
+
+    def test_users_can_see_own_datasets(self):
+        assert call_auth(
+            'package_show',
+            get_context(self.user_1),
+            id=self.dataset_1['id'],
+        )
+        assert call_auth(
+            'package_show',
+            get_context(self.user_2),
+            id=self.dataset_2['id'],
+        )
+
+    def test_collaborators_can_see_datasets(self):
+        call_action(
+            'package_collaborator_create',
+            id=self.dataset_1['id'],
+            user_id=self.user_2['id'],
+            capacity='member'
+        )
+        assert call_auth(
+            'package_show',
+            get_context(self.user_2),
+            id=self.dataset_1['id'],
+        )
+
+    def test_collaborators_can_edit_datasets(self):
+        call_action(
+            'package_collaborator_create',
+            id=self.dataset_2['id'],
+            user_id=self.user_1['id'],
+            capacity='editor'
+        )
+        assert call_auth(
+            'package_update',
+            get_context(self.user_1),
+            id=self.dataset_2['id'],
+        )
