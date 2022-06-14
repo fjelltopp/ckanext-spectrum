@@ -7,6 +7,7 @@ import ckan.plugins.toolkit as toolkit
 import ckan.lib.uploader as uploader
 import ckanext.blob_storage.helpers as blobstorage_helpers
 import ckan.logic.auth as logic_auth
+from ckan.logic.auth.create import _check_group_auth
 from ckan.logic.auth.get import package_show
 from ckan.lib.plugins import DefaultPermissionLabels
 from giftless_client import LfsClient
@@ -14,7 +15,7 @@ from werkzeug.datastructures import FileStorage as FlaskFileStorage
 from ckanext.oht.helpers import (
     get_dataset_from_id, get_facet_items_dict
 )
-
+import ckan.authz as authz
 
 log = logging.getLogger(__name__)
 
@@ -84,20 +85,29 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         }
 
 
-@toolkit.chained_auth_function
-def _package_update_auth_function(next_auth_function, context, data_dict):
+def _package_update_auth_function(context, data_dict):
     """
-    Ensures that only users who can view a dataset can edit the dataset.
+    Explicitly ensures that only collaborators and creators can edit data.
     """
+    model = context['model']
     user = context.get('user')
+    user_obj = model.User.get(user)
     package = logic_auth.get_package_object(context, data_dict)
 
-    if not package_show(context, data_dict)['success']:
-        return {
-            'success': False,
-            'msg': toolkit._(f'User {user} not authorized to view package {package.id}')
-        }
-    return next_auth_function(context, data_dict)
+    if user_obj:
+        is_editor_collaborator = (
+            authz.check_config_permission('allow_dataset_collaborators') and
+            authz.user_is_collaborator_on_dataset(user_obj.id, package.id, ['admin', 'editor'])
+        )
+        is_dataset_creator = user_obj.id == package.creator_user_id
+
+        if is_dataset_creator or is_editor_collaborator:
+            return {'success': True}
+
+    return {
+        'success': False,
+        'msg': toolkit._(f'User {user} not authorized to edit package {package.id}')
+    }
 
 
 def _giftless_upload(context, resource, current=None):
