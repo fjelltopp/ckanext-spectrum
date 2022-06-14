@@ -29,6 +29,12 @@ class TestAuth():
             private=True,
             user=self.user_2
         )
+        self.dataset_3 = factories.Dataset(
+            owner_org=self.org['id'],
+            type='oht',
+            private=False,
+            user=self.user_2
+        )
 
     def test_users_cant_see_other_users_datasets(self):
 
@@ -111,3 +117,18 @@ class TestAuth():
             get_context(self.user_1),
             id=self.dataset_2['id'],
         )
+
+    def test_users_can_see_public_datasets(self):
+        assert call_auth(
+            'package_show',
+            get_context(self.user_1),
+            id=self.dataset_3['id'],
+        )
+
+    def test_users_require_permission_to_edit_public_datasets(self):
+        with pytest.raises(toolkit.NotAuthorized):
+            call_auth(
+                'package_update',
+                get_context(self.user_1),
+                id=self.dataset_3['id']
+            )

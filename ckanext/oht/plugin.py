@@ -70,13 +70,13 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         Stops private datasets from being visible to other members of the
         same organisation.
         """
-        labels = super(OHTPlugin, self).get_dataset_labels(dataset_obj)
+        labels = set(super(OHTPlugin, self).get_dataset_labels(dataset_obj))
 
         if dataset_obj.owner_org:
-            labels.remove(f'member-{dataset_obj.owner_org}')
-            labels.append(f'creator-{dataset_obj.creator_user_id}')
+            labels.discard(f'member-{dataset_obj.owner_org}')
+            labels.add(f'creator-{dataset_obj.creator_user_id}')
 
-        return labels
+        return list(labels)
 
     def get_auth_functions(self):
         return {
