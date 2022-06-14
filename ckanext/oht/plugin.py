@@ -68,7 +68,7 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
     def get_dataset_labels(self, dataset_obj):
         """
         Stops private datasets from being visible to other members of the
-        same organisation. Only the creator and collaborators can see them.
+        same organisation.
         """
         labels = super(OHTPlugin, self).get_dataset_labels(dataset_obj)
 
@@ -86,8 +86,12 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
 
 @toolkit.chained_auth_function
 def _package_update_auth_function(next_auth_function, context, data_dict):
+    """
+    Ensures that only users who can view a dataset can edit the dataset.
+    """
     user = context.get('user')
     package = logic_auth.get_package_object(context, data_dict)
+
     if not package_show(context, data_dict)['success']:
         return {
             'success': False,

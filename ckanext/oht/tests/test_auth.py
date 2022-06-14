@@ -33,7 +33,6 @@ class TestAuth():
     def test_users_cant_see_other_users_datasets(self):
 
         with pytest.raises(toolkit.NotAuthorized):
-
             call_auth(
                 'package_show',
                 get_context(self.user_1),
