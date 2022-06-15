@@ -66,8 +66,13 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
 
     def get_dataset_labels(self, dataset_obj):
         """
-        Stops private datasets from being visible to other members of the
-        same organisation.
+        Stops private datasets from being visible to other members of the same
+        organisation, whilst ensuring they remain visible to the creator user.
+
+        This function is extending the default parent class behaviour found
+        in ckan.lib.plugins.DefaultPermissionLabels.  We remove the label
+        identifying the dataset as a member of the parent organisation, and
+        replace it with the label identifying the creator user id.
         """
         labels = set(super(OHTPlugin, self).get_dataset_labels(dataset_obj))
 
