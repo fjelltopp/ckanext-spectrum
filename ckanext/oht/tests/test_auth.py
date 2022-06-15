@@ -13,13 +13,13 @@ def users():
     ]
 
 
-@pytest.fixture
+@pytest.fixture(params=["editor", "admin"])
 def organisation(request, users):
 
     return factories.Organization(
         users=[
-            {'name': users[0]['name'], 'capacity': 'editor'},
-            {'name': users[1]['name'], 'capacity': 'editor'}
+            {'name': users[0]['name'], 'capacity': request.param},
+            {'name': users[1]['name'], 'capacity': request.param}
         ]
     )
 
