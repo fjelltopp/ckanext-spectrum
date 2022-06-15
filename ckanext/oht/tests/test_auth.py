@@ -45,21 +45,7 @@ class TestAuth():
                 id=self.dataset_2['id']
             )
 
-        with pytest.raises(toolkit.NotAuthorized):
-            call_auth(
-                'package_show',
-                get_context(self.user_2),
-                id=self.dataset_1['id']
-            )
-
     def test_users_cant_edit_other_users_private_datasets(self):
-
-        with pytest.raises(toolkit.NotAuthorized):
-            call_auth(
-                'package_update',
-                get_context(self.user_1),
-                id=self.dataset_2['id']
-            )
 
         with pytest.raises(toolkit.NotAuthorized):
             call_auth(
@@ -74,22 +60,12 @@ class TestAuth():
             get_context(self.user_1),
             id=self.dataset_1['id']
         )
-        assert call_auth(
-            'package_update',
-            get_context(self.user_2),
-            id=self.dataset_2['id']
-        )
 
     def test_users_can_see_own_datasets(self):
         assert call_auth(
             'package_show',
             get_context(self.user_1),
             id=self.dataset_1['id'],
-        )
-        assert call_auth(
-            'package_show',
-            get_context(self.user_2),
-            id=self.dataset_2['id'],
         )
 
     def test_collaborators_can_see_datasets(self):
@@ -126,6 +102,7 @@ class TestAuth():
         )
 
     def test_users_require_permission_to_edit_public_datasets(self):
+
         with pytest.raises(toolkit.NotAuthorized):
             call_auth(
                 'package_update',
