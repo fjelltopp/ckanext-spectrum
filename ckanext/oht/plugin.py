@@ -44,11 +44,9 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
     # IFacets
     def dataset_facets(self, facet_dict, package_type):
         new_fd = OrderedDict()
-        new_fd['groups'] = plugins.toolkit._('Groups')
-        new_fd['program_area'] = plugins.toolkit._('Program area')
+        new_fd['type'] = plugins.toolkit._('Type')
+        new_fd['country_code'] = plugins.toolkit._('Country Code')
         new_fd['tags'] = plugins.toolkit._('Tags')
-        new_fd['year'] = plugins.toolkit._('Year')
-        new_fd['res_format'] = plugins.toolkit._('Formats')
         return new_fd
 
     # IResourceController
