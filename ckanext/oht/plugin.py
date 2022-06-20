@@ -84,8 +84,29 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
 
     def get_auth_functions(self):
         return {
-            'package_update': _package_update_auth_function
+            'package_update': _package_update_auth_function,
+            'package_collaborator_create': _creators_can_manage_collaborators,
+            'package_collaborator_delete': _creators_can_manage_collaborators,
+            'package_collaborator_list': _creators_can_manage_collaborators
         }
+
+
+@toolkit.chained_auth_function
+def _creators_can_manage_collaborators(next_auth, context, data_dict):
+    """
+    Explicitly ensures that dataset creators can always edit collaborators.
+    """
+    user = context['user']
+    model = context['model']
+
+    package = model.Package.get(data_dict['id'])
+    user_obj = model.User.get(user)
+
+    if package.creator_user_id == user_obj.id:
+        return {'success': True}
+
+    else:
+        return next_auth(context, data_dict)
 
 
 @toolkit.auth_disallow_anonymous_access
