@@ -55,6 +55,14 @@
 	border-bottom: solid 5px #49338f;
 }
 
+#package-creator-user img {
+    display: none;
+}
+
+.context-info p{
+	margin: 5px 0;
+}
+
 
 /* mobile */
 @media only screen and (max-width: 768px) {

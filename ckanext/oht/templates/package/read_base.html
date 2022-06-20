@@ -5,3 +5,24 @@
   {{ h.build_nav_icon(dataset_type ~ '.activity', _('Activity Stream'), id=pkg.id if is_activity_archive else pkg.name, icon='clock-o') }}
 {% endblock %}
 
+{% block secondary_content %}
+  <div class="module context-info">
+    <section class="module-content">
+      <h1 class="heading">{{ h.dataset_display_name(pkg) }}</h1>
+      <p class="small" title="{{ h.render_datetime(pkg.metadata_modified, with_hours=True) }}">
+         {{ _('Last modified') + ": "}}{{ h.time_ago_from_timestamp(pkg.metadata_modified) }}
+      </p>
+      <p class="small" title="{{ h.render_datetime(pkg.metadata_created, with_hours=True) }}">
+         {{ _('Created') + ": "}}{{ h.time_ago_from_timestamp(pkg.metadata_created) }}
+      </p>
+    </section>
+  </div>
+  <div class="module module-narrow module-shallow context-info">
+    <h2 class="module-heading"><i class="fa fa-building-o"></i> {{ _('Creator') }}</h2>
+    <section class="module-content">
+      <div class="image">{{h.user_image(pkg['creator_user_id'], size=270)}}</div>
+      <h1 class="heading" id="package-creator-user">{{h.linked_user(pkg['creator_user_id'])}}</h1>
+    </section>
+  </div>
+
+{% endblock %}
