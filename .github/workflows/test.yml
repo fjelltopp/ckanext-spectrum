@@ -54,6 +54,6 @@ jobs:
             node-version: 16.14.2
       - name: Setup extension
         run: |
-          cd ./ckanext/unaids/react
+          cd ./ckanext/oht/react
           yarn
           yarn test --silent
