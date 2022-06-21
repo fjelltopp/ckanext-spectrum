@@ -9,20 +9,20 @@ dataset_fields:
 - field_name: title
   label: Projection Title
   preset: title
-  form_placeholder: eg. A descriptive title
+  form_placeholder: eg. A descriptive filename
 
 - field_name: name
   label: URL
   preset: dataset_slug
   form_placeholder: eg. my-dataset
 
-- field_name: start_year
-  label: Start Year
+- field_name: first_year
+  label: First Year
   validators: ignore_missing int_validator
   form_placeholder: eg. 2012
 
-- field_name: end_year
-  label: End Year
+- field_name: final_year
+  label: Final Year
   validators: ignore_missing int_validator
   form_placeholder: eg. 2022
 
@@ -31,9 +31,17 @@ dataset_fields:
   preset: tag_string_autocomplete
   form_placeholder: eg. economy, mental health, government
 
-- field_name: country_code
+- field_name: country_name
   label: Country Code
-  form_placeholder: USA
+  form_placeholder: Benin
+
+- field_name: country_iso3_alpha
+  label: Country Code
+  form_placeholder: BEN
+
+- field_name: country_iso3_num
+  label: Country Code
+  form_placeholder: 204
 
 - field_name: notes
   label: Notes
@@ -51,7 +59,7 @@ resource_fields:
   preset: resource_url_upload
 
 - field_name: name
-  label: Name (Module ID)
+  label: Title (Module ID)
 
 - field_name: format
   label: Format
