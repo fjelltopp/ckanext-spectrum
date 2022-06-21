@@ -32,15 +32,15 @@ dataset_fields:
   form_placeholder: eg. economy, mental health, government
 
 - field_name: country_name
-  label: Country Code
+  label: Country Name
   form_placeholder: Benin
 
 - field_name: country_iso3_alpha
-  label: Country Code
+  label: Country ISO3 Alpha Code
   form_placeholder: BEN
 
 - field_name: country_iso3_num
-  label: Country Code
+  label: Country ISO3 Numeric Code
   form_placeholder: 204
 
 - field_name: notes
