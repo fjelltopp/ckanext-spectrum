@@ -9,7 +9,7 @@ For further information please see our other docs:
 - [OHT CKAN API Documentation](https://documenter.getpostman.com/view/15920939/UzBpK5q9)
 
 
-##Key features
+## Key features
 
 The following key features are provided by this extension:
 
