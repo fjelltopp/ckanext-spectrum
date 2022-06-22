@@ -2,7 +2,22 @@
 
 # ckanext-oht
 
-Provides tailored styling and features for CKAN, according to Avenir Health's requirements for their One Health Tool.
+Provides tailored styling and features for CKAN, according to Avenir Health's requirements for their One Health Tool CKAN instance.
+
+For further information please see our other docs:
+
+- [OHT CKAN API Documentation](https://documenter.getpostman.com/view/15920939/UzBpK5q9)
+
+
+##Key features
+
+The following key features are provided by this extension:
+
+- Tailored UI styling, according to the Avenir Health branding.
+- Integration with Giftless and CKAN extensions ckanext-blob-storage, ckanext-authz-service and ckanext-versions for revisioning and release management
+- Template changes to streamline the UI to Avenir's needs.
+- Changes to CKAN auth, to enable all users to be members of one organisation, but only edit their own datasets or the datasets they are collaborators on. The reason for this change is that the ckanext-blob-storage and ckanext-authz-service extensions are tightly coupled with the organisation model.
+
 
 
 ## Installation
@@ -29,17 +44,6 @@ To install ckanext-oht:
      sudo service apache2 reload
 
 
-## Config settings
-
-None at present
-
-**TODO:** Document any optional config settings here. For example:
-
-	# The minimum number of hours to wait before re-checking a resource
-	# (optional, default: 24).
-	ckanext.oht.some_setting = some_default_value
-
-
 ## Developer installation
 
 To install ckanext-oht for development, activate your CKAN virtualenv and
@@ -57,38 +61,6 @@ To run the tests, do:
 
     pytest --ckan-ini=test.ini
 
-
-## Releasing a new version of ckanext-oht
-
-If ckanext-oht should be available on PyPI you can follow these steps to publish a new version:
-
-1. Update the version number in the `setup.py` file. See [PEP 440](http://legacy.python.org/dev/peps/pep-0440/#public-version-identifiers) for how to choose version numbers.
-
-2. Make sure you have the latest version of necessary packages:
-
-    pip install --upgrade setuptools wheel twine
-
-3. Create a source and binary distributions of the new version:
-
-       python setup.py sdist bdist_wheel && twine check dist/*
-
-   Fix any errors you get.
-
-4. Upload the source distribution to PyPI:
-
-       twine upload dist/*
-
-5. Commit any outstanding changes:
-
-       git commit -a
-       git push
-
-6. Tag the new release of the project on GitHub with the version number from
-   the `setup.py` file. For example if the version number in `setup.py` is
-   0.0.1 then do:
-
-       git tag 0.0.1
-       git push --tags
 
 ## License
 
