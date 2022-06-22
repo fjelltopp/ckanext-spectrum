@@ -1,4 +1,4 @@
-[![Tests](https://github.com/fjelltopp/ckanext-oht/workflows/Tests/badge.svg?branch=main)](https://github.com/fjelltopp/ckanext-oht/actions)
+[![Tests](https://github.com/fjelltopp/ckanext-oht/workflows/Tests/badge.svg?branch=master)](https://github.com/fjelltopp/ckanext-oht/actions)
 
 # ckanext-oht
 
