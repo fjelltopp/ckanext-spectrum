@@ -124,3 +124,33 @@ class TestAuth():
                 get_context(users[0]),
                 id=datasets[2]['id']
             )
+
+    def test_creator_can_list_collaborators(self, users, datasets):
+        assert call_auth(
+            'package_collaborator_list',
+            get_context(users[0]),
+            id=datasets[0]['id']
+        )
+
+    def test_creator_can_add_collaborators(self, users, datasets):
+        assert call_auth(
+            'package_collaborator_create',
+            get_context(users[0]),
+            id=datasets[0]['id'],
+            user_id=users[1]['id'],
+            capacity='editor'
+        )
+
+    def test_creator_can_delete_collaborators(self, users, datasets):
+        call_action(
+            'package_collaborator_create',
+            id=datasets[0]['id'],
+            user_id=users[1]['id'],
+            capacity='editor'
+        )
+        assert call_auth(
+            'package_collaborator_delete',
+            get_context(users[0]),
+            id=datasets[0]['id'],
+            user_id=users[1]['id']
+        )
