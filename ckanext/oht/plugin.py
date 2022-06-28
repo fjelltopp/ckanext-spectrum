@@ -5,12 +5,14 @@ import ckan.plugins.toolkit as toolkit
 import ckan.lib.uploader as uploader
 import ckanext.blob_storage.helpers as blobstorage_helpers
 from ckan.lib.plugins import DefaultPermissionLabels
+import ckan.model as model
 from ckanext.oht.helpers import (
     get_dataset_from_id, get_facet_items_dict
 )
 import ckanext.oht.authz as oht_authz
 import ckanext.oht.upload as oht_upload
-
+from ckan.views import _identify_user_default
+from flask import abort
 
 log = logging.getLogger(__name__)
 
@@ -24,6 +26,7 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
     plugins.implements(plugins.IPermissionLabels)
     plugins.implements(plugins.IAuthFunctions)
     plugins.implements(plugins.IPackageController, inherit=True)
+    plugins.implements(plugins.IAuthenticator, inherit=True)
 
     # ITemplateHelpers
     def get_helpers(self):
@@ -94,3 +97,20 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         if data_dict.get('private'):
             oht_upload.add_activity(context, data_dict, "new")
 
+    def identify(self):
+        _identify_user_default()
+        substitute_user_id = toolkit.request.headers.get('CKAN-Substitute-User')
+
+        if substitute_user_id:
+            sysadmin = toolkit.g.userobj and toolkit.g.userobj.sysadmin
+
+            if not sysadmin:
+                abort(400, toolkit._("CKAN-Substitute-User header can only be used by sysadmins"))
+
+            substitute_user_obj = model.User.get(substitute_user_id)
+
+            if not substitute_user_obj:
+                abort(400, toolkit._("CKAN-Substitute-User header is not a valid user id."))
+
+            toolkit.g.user = substitute_user_id
+            toolkit.g.userobj = substitute_user_obj
