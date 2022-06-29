@@ -12,7 +12,6 @@ from ckanext.oht.helpers import (
 import ckanext.oht.authz as oht_authz
 import ckanext.oht.upload as oht_upload
 from ckan.views import _identify_user_default
-from flask import abort
 
 log = logging.getLogger(__name__)
 
@@ -105,12 +104,24 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
             sysadmin = toolkit.g.userobj and toolkit.g.userobj.sysadmin
 
             if not sysadmin:
-                abort(400, toolkit._("CKAN-Substitute-User header can only be used by sysadmins"))
+                return {
+                    "success": False,
+                    "error": {
+                        "__type": "Not Authorized",
+                        "message": "User is not authorized to send requests with CKAN-Substitute-User header"
+                    }
+                }, 403
 
             substitute_user_obj = model.User.get(substitute_user_id)
 
             if not substitute_user_obj:
-                abort(400, toolkit._("CKAN-Substitute-User header is not a valid user id."))
+                return {
+                    "success": False,
+                    "error": {
+                        "__type": "Bad Request",
+                        "message": "CKAN-Substitute-User header does not identify a valid CKAN user"
+                    }
+                }, 400
 
             toolkit.g.user = substitute_user_id
             toolkit.g.userobj = substitute_user_obj
