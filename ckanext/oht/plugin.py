@@ -108,7 +108,7 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
                     "success": False,
                     "error": {
                         "__type": "Not Authorized",
-                        "message": "User is not authorized to send requests with CKAN-Substitute-User header"
+                        "message": "User not authorized to send requests with CKAN-Substitute-User header"
                     }
                 }, 403
 
