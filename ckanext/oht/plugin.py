@@ -23,6 +23,7 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
     plugins.implements(plugins.IResourceController, inherit=True)
     plugins.implements(plugins.IPermissionLabels)
     plugins.implements(plugins.IAuthFunctions)
+    plugins.implements(plugins.IPackageController, inherit=True)
 
     # ITemplateHelpers
     def get_helpers(self):
@@ -83,3 +84,18 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
             'package_collaborator_delete': oht_authz.creators_can_manage_collaborators,
             'package_collaborator_list': oht_authz.creators_can_manage_collaborators
         }
+
+    def after_update(self, context, data_dict):
+        if data_dict.get('private'):
+            _add_activity(context, data_dict, "changed")
+
+    def after_create(self, context, data_dict):
+        if data_dict.get('private'):
+            _add_activity(context, data_dict, "new")
+
+
+def _add_activity(context, data_dict, activity_type):
+    user_id = context['model'].User.by_name(context['user']).id
+    package = context.get("package", context['model'].Package.get(data_dict["name"]))
+    activity = package.activity_stream_item(activity_type, user_id)
+    context['session'].add(activity)
