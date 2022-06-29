@@ -16,7 +16,8 @@ class TestSubstituteUser():
             'success': False,
             'error': {
                 '__type': 'Not Authorized',
-                'message': 'User not authorized to send requests with CKAN-Substitute-User header'
+                'message': 'User not authorized to send requests '
+                           'with CKAN-Substitute-User header'
             }
         }
 
@@ -34,7 +35,8 @@ class TestSubstituteUser():
             'success': False,
             'error': {
                 '__type': 'Not Authorized',
-                'message': 'User not authorized to send requests with CKAN-Substitute-User header'
+                'message': 'User not authorized to send requests '
+                           'with CKAN-Substitute-User header'
             }
         }
 
@@ -52,7 +54,8 @@ class TestSubstituteUser():
             "success": False,
             "error": {
                 "__type": "Bad Request",
-                "message": "CKAN-Substitute-User header does not identify a valid CKAN user"
+                "message": "CKAN-Substitute-User header does "
+                           "not identify a valid CKAN user"
             }
         }
 

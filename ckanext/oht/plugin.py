@@ -102,7 +102,7 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         done by setting a HTTP Header in the requests "CKAN-Substitute-User" to be the
         username or user id of another CKAN user.
         """
-        # Private import from another module is not ideal, but is the only way to use core CKAN logic.
+        # Not ideal, but this private import is the only way to use core CKAN logic.
         _identify_user_default()
         substitute_user_id = toolkit.request.headers.get('CKAN-Substitute-User')
 
@@ -114,7 +114,8 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
                     "success": False,
                     "error": {
                         "__type": "Not Authorized",
-                        "message": "User not authorized to send requests with CKAN-Substitute-User header"
+                        "message": "User not authorized to send requests "
+                                   "with CKAN-Substitute-User header"
                     }
                 }, 403
 
@@ -125,7 +126,8 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
                     "success": False,
                     "error": {
                         "__type": "Bad Request",
-                        "message": "CKAN-Substitute-User header does not identify a valid CKAN user"
+                        "message": "CKAN-Substitute-User header does not "
+                                   "identify a valid CKAN user"
                     }
                 }, 400
 
