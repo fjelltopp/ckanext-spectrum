@@ -97,6 +97,12 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
             oht_upload.add_activity(context, data_dict, "new")
 
     def identify(self):
+        """
+        Allows sysadmins to send requests "on behalf" of a substitute user. This is
+        done by setting a HTTP Header in the requests "CKAN-Substitute-User" to be the
+        username or user id of another CKAN user.
+        """
+        # Private import from another module is not ideal, but is the only way to use core CKAN logic.
         _identify_user_default()
         substitute_user_id = toolkit.request.headers.get('CKAN-Substitute-User')
 
