@@ -1,14 +1,3 @@
-FileInputComponentStyles:
-    contents:
-        - FileInputComponent.css
-    output: oht/%(version)s_FileInputComponent.css
-
-FileInputComponentScripts:
-    contents:
-        - frictionless-js.js
-        - build/FileInputComponent.js
-    output: oht/%(version)s_FileInputComponent.js
-
 oht-theme:
   filter: cssrewrite
   output: ckanext-oht/%(version)s-oht.css
