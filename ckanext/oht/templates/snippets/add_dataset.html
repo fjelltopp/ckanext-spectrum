@@ -1,0 +1,12 @@
+{# Adds 'Add Dataset' button #}
+
+{% set dataset_type = dataset_type if dataset_type else 'dataset' %}
+{% set schema = h.scheming_get_dataset_schema(dataset_type)%}
+{% set dataset_name = schema.name if schema.name else 'General Data' %}
+{% set dataset_link_name = schema.link_name if schema.link_name else dataset_name %}
+
+{% if group %}
+    {% link_for _('General Data'), controller='package', action='new', group=group, class_='dropdown-item'%}
+{% else %}
+    {% link_for _(dataset_link_name), controller='package', action='new', named_route=dataset_type + '_new', class_='dropdown-item' %}
+{% endif %}

@@ -1,5 +1,6 @@
 scheming_version: 2
 dataset_type: list
+name: LiST Projection
 about: A customized dataset schema for LiST Projections.
 about_url: http://github.com/ckan/ckanext-scheming
 
