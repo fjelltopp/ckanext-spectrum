@@ -5,10 +5,12 @@ import ckan.plugins.toolkit as toolkit
 import ckan.lib.uploader as uploader
 import ckanext.blob_storage.helpers as blobstorage_helpers
 from ckan.lib.plugins import DefaultPermissionLabels
+
 from ckanext.oht.helpers import (
     get_dataset_from_id, get_facet_items_dict
 )
 import ckanext.oht.authz as oht_authz
+import ckanext.oht.authn as oht_authn
 import ckanext.oht.upload as oht_upload
 
 
@@ -24,6 +26,7 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
     plugins.implements(plugins.IPermissionLabels)
     plugins.implements(plugins.IAuthFunctions)
     plugins.implements(plugins.IPackageController, inherit=True)
+    plugins.implements(plugins.IAuthenticator, inherit=True)
 
     # ITemplateHelpers
     def get_helpers(self):
@@ -94,3 +97,14 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         if data_dict.get('private'):
             oht_upload.add_activity(context, data_dict, "new")
 
+    # IAuthenticator
+    def identify(self):
+        """
+        Allows sysadmins to send requests "on behalf" of a substitute user. This is
+        done by setting a HTTP Header in the requests "CKAN-Substitute-User" to be the
+        username or user id of another CKAN user.
+        """
+        substitute_user_id = toolkit.request.headers.get('CKAN-Substitute-User')
+
+        if substitute_user_id:
+            return oht_authn.substitute_user(substitute_user_id)
