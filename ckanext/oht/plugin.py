@@ -107,4 +107,4 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         substitute_user_id = toolkit.request.headers.get('CKAN-Substitute-User')
 
         if substitute_user_id:
-            oht_authn.substitute_user(substitute_user_id)
+            return oht_authn.substitute_user(substitute_user_id)
