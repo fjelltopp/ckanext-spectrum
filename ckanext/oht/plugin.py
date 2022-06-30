@@ -97,6 +97,7 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         if data_dict.get('private'):
             oht_upload.add_activity(context, data_dict, "new")
 
+    # IAuthenticator
     def identify(self):
         """
         Allows sysadmins to send requests "on behalf" of a substitute user. This is
