@@ -9,6 +9,13 @@ import ckan.plugins.toolkit as toolkit
 log = logging.getLogger(__name__)
 
 
+def add_activity(context, data_dict, activity_type):
+    user_id = context['model'].User.by_name(context['user']).id
+    package = context.get("package", context['model'].Package.get(data_dict["name"]))
+    activity = package.activity_stream_item(activity_type, user_id)
+    context['session'].add(activity)
+
+
 def handle_giftless_uploads(context, resource, current=None):
     if _data_dict_is_resource(resource):
         _giftless_upload(context, resource, current=current)
@@ -85,3 +92,4 @@ def _get_upload_authz_token(context, dataset_name, org_name):
         log.error(error)
         raise toolkit.NotAuthorized(error)
     return authz_result['token']
+
