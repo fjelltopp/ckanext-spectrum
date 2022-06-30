@@ -5,13 +5,14 @@ import ckan.plugins.toolkit as toolkit
 import ckan.lib.uploader as uploader
 import ckanext.blob_storage.helpers as blobstorage_helpers
 from ckan.lib.plugins import DefaultPermissionLabels
-import ckan.model as model
+
 from ckanext.oht.helpers import (
     get_dataset_from_id, get_facet_items_dict
 )
 import ckanext.oht.authz as oht_authz
+import ckanext.oht.authn as oht_authn
 import ckanext.oht.upload as oht_upload
-from ckan.views import _identify_user_default
+
 
 log = logging.getLogger(__name__)
 
@@ -102,34 +103,7 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         done by setting a HTTP Header in the requests "CKAN-Substitute-User" to be the
         username or user id of another CKAN user.
         """
-        # Not ideal, but this private import is the only way to use core CKAN logic.
-        _identify_user_default()
         substitute_user_id = toolkit.request.headers.get('CKAN-Substitute-User')
 
         if substitute_user_id:
-            sysadmin = toolkit.g.userobj and toolkit.g.userobj.sysadmin
-
-            if not sysadmin:
-                return {
-                    "success": False,
-                    "error": {
-                        "__type": "Not Authorized",
-                        "message": "User not authorized to send requests "
-                                   "with CKAN-Substitute-User header"
-                    }
-                }, 403
-
-            substitute_user_obj = model.User.get(substitute_user_id)
-
-            if not substitute_user_obj:
-                return {
-                    "success": False,
-                    "error": {
-                        "__type": "Bad Request",
-                        "message": "CKAN-Substitute-User header does not "
-                                   "identify a valid CKAN user"
-                    }
-                }, 400
-
-            toolkit.g.user = substitute_user_id
-            toolkit.g.userobj = substitute_user_obj
+            oht_authn.substitute_user(substitute_user_id)
