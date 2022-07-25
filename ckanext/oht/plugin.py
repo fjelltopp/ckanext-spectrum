@@ -12,7 +12,7 @@ from ckanext.oht.helpers import (
 import ckanext.oht.authz as oht_authz
 import ckanext.oht.authn as oht_authn
 import ckanext.oht.upload as oht_upload
-from flask import abort, jsonify
+import ckanext.oht.actions as oht_actions
 
 
 log = logging.getLogger(__name__)
@@ -26,6 +26,7 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
     plugins.implements(plugins.IResourceController, inherit=True)
     plugins.implements(plugins.IPermissionLabels)
     plugins.implements(plugins.IAuthFunctions)
+    plugins.implements(plugins.IActions)
     plugins.implements(plugins.IPackageController, inherit=True)
     plugins.implements(plugins.IAuthenticator, inherit=True)
 
@@ -87,6 +88,12 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
             'package_collaborator_create': oht_authz.creators_can_manage_collaborators,
             'package_collaborator_delete': oht_authz.creators_can_manage_collaborators,
             'package_collaborator_list': oht_authz.creators_can_manage_collaborators
+        }
+
+    # IActions
+    def get_actions(self):
+        return {
+            'user_create': oht_actions.user_create
         }
 
     # IPackageContoller
