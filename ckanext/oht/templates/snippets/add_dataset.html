@@ -6,7 +6,7 @@
 {% set dataset_link_name = schema.link_name if schema.link_name else dataset_name %}
 
 {% if group %}
-    {% link_for _('General Data'), controller='package', action='new', group=group, class_='dropdown-item'%}
+    {% link_for _('General Data'), named_route='dataset.new', group=group, class_='dropdown-item' %}
 {% else %}
-    {% link_for _(dataset_link_name), controller='package', action='new', named_route=dataset_type + '_new', class_='dropdown-item' %}
+    {% link_for _(dataset_link_name), named_route=dataset_type ~ '.new', class_='dropdown-item' %}
 {% endif %}
