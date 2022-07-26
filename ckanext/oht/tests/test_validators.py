@@ -4,11 +4,11 @@ from ckan.tests.helpers import call_action
 from ckan.plugins.toolkit import ValidationError
 
 
-def create_dataset(dataset_title="North Pole Projection", **kwargs):
+def create_dataset(**kwargs):
     return call_action(
         "package_create",
         type="auto-generate-name-from-title",
-        title=dataset_title,
+        title="North Pole Projection",
         **kwargs
     )
 
