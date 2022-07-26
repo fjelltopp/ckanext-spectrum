@@ -14,7 +14,8 @@ dataset_fields:
 
 - field_name: name
   label: URL
-  preset: dataset_slug
+  validators: auto_generate_name_from_title unicode_safe name_validator package_name_validator
+  form_snippet: slug.html
   form_placeholder: eg. my-dataset
 
 - field_name: first_year
