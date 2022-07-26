@@ -49,7 +49,7 @@ class TestCreateUser():
         user_create(next_action, {}, data_dict)
         generated_password = next_action.call_args[0][1]['password']
         assert len(generated_password) > 30
-        zxcvbn(generated_password)['score'] == 4
+        assert zxcvbn(generated_password)['score'] == 4
 
     def test_integration_without_password(self):
         call_action(
