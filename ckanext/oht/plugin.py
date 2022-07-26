@@ -12,6 +12,7 @@ from ckanext.oht.helpers import (
 import ckanext.oht.authz as oht_authz
 import ckanext.oht.authn as oht_authn
 import ckanext.oht.upload as oht_upload
+from flask import abort, jsonify
 
 
 log = logging.getLogger(__name__)
@@ -104,6 +105,16 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         done by setting a HTTP Header in the requests "CKAN-Substitute-User" to be the
         username or user id of another CKAN user.
         """
+
+        if not oht_authn.is_sysadmin():
+            return {
+                "success": False,
+                "error": {
+                    "__type": "Not Authorized",
+                    "message": "Must be a system administrator to perform this action."
+                }
+            }, 403
+
         substitute_user_id = toolkit.request.headers.get('CKAN-Substitute-User')
 
         if substitute_user_id:
