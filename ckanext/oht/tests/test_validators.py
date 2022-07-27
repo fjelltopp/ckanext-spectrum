@@ -54,3 +54,6 @@ class TestAutoGenerateNameFromTitle(object):
         with pytest.raises(ValidationError, match="Could not autogenerate"):
             create_dataset()
 
+    def test_missing_title(self):
+        with pytest.raises(ValidationError, match="title.*Missing value"):
+            call_action("package_create", type="auto-generate-name-from-title")

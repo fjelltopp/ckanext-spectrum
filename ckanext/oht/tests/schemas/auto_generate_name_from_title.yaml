@@ -11,6 +11,7 @@ dataset_fields:
   label: Projection Title
   preset: title
   form_placeholder: eg. A descriptive filename
+  validators: not_empty unicode_safe
 
 - field_name: name
   label: URL

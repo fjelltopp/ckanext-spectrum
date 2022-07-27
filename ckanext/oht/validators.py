@@ -15,8 +15,11 @@ def auto_generate_name_from_title(field, schema):
             data[key] = context['package'].name
             return
 
-        if data[key]:
+        if data[key]:  # Use the exact name given by the user
             return
+
+        if not data[('title',)]:  # No title means we can't proceed
+            raise ValidationError({'title': ['Missing value']})
 
         title_slug = slugify.slugify(data[('title',)])
         data[key] = title_slug
