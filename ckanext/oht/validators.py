@@ -12,21 +12,22 @@ def auto_generate_name_from_title(field, schema):
 
     def validator(key, data, errors, context):
 
-        if context.get('package'):  # Editing an existing package
+        # Preserve the name when editing an existing package
+        if context.get('package'):
             data[key] = context['package'].name
             return
 
-        if data[key]:  # Use the exact name given by the user
+        # Use the exact name given by the user if it exists
+        if data[key]:
             return
 
-        if not data[('title',)]:  # No title means we can't proceed
+        if not data[('title',)]:
             raise ValidationError({'title': ['Missing value']})
 
         title_slug = slugify.slugify(data[('title',)])
         data[key] = title_slug
 
-        # Multiple attempts to keep alpha_id as short as possible
-        # < 1e-42 chance that 10 attempts fail with 1000 duplicate titles
+        # Multiple attempts so alpha_id can be as short as possible
         for counter in range(10):
             package_name_errors = copy.deepcopy(errors)
             package_name_validator(key, data, package_name_errors, context)
