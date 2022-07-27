@@ -6,18 +6,10 @@ from ckan.tests import factories
 @pytest.mark.usefixtures("clean_db")
 class TestSysadminsOnlyCanAccessAPI():
 
-    def test_error_raised_for_unregistered_user(self, app):
-        response = app.get(
-            toolkit.url_for('api.action', ver=3, logic_function='package_list')
-        )
-        assert response.status_code == 403
-        assert response.json == {
-            'success': False,
-            'error': {
-                '__type': 'Not Authorized',
-                'message': "Must be a system administrator to perform this action."
-            }
-        }
+    def test_unregistered_user_can_access_home(self, app):
+        # Regression test: this feature was found to block access to homepage
+        response = app.get('/')
+        assert response.status_code == 200
 
     def test_error_raised_for_non_sysadmin_user(self, app):
         user = factories.User(sysadmin=False)
@@ -39,13 +31,6 @@ class TestSysadminsOnlyCanAccessAPI():
 
 @pytest.mark.usefixtures("clean_db")
 class TestSubstituteUser():
-
-    def test_error_raised_for_unregistered_user(self, app):
-        response = app.get(
-            toolkit.url_for('api.action', ver=3, logic_function='package_list'),
-            headers={'CKAN-Substitute-User': 'fjelltopp_editor'}
-        )
-        assert response.status_code == 403
 
     def test_error_raised_for_non_sysadmin_user(self, app):
         user = factories.User(sysadmin=False)

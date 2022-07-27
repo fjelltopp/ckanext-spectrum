@@ -1,5 +1,4 @@
 import ckan.model as model
-from ckan.views import _identify_user_default
 import ckan.plugins.toolkit as toolkit
 
 
@@ -18,10 +17,3 @@ def substitute_user(substitute_user_id):
 
     toolkit.g.user = substitute_user_id
     toolkit.g.userobj = substitute_user_obj
-
-
-def is_sysadmin():
-    # Not ideal, but this private import is the only way to use core CKAN logic.
-    _identify_user_default()
-    sysadmin = toolkit.g.userobj and toolkit.g.userobj.sysadmin
-    return bool(sysadmin)

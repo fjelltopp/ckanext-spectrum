@@ -3,6 +3,7 @@ from collections import OrderedDict
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 import ckan.lib.uploader as uploader
+from ckan.views import _identify_user_default
 import ckanext.blob_storage.helpers as blobstorage_helpers
 from ckan.lib.plugins import DefaultPermissionLabels
 
@@ -14,6 +15,7 @@ import ckanext.oht.authn as oht_authn
 import ckanext.oht.upload as oht_upload
 import ckanext.oht.actions as oht_actions
 import ckanext.oht.validators as oht_validators
+
 
 log = logging.getLogger(__name__)
 
@@ -120,16 +122,22 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         username or user id of another CKAN user.
         """
 
-        if not oht_authn.is_sysadmin():
-            return {
-                "success": False,
-                "error": {
-                    "__type": "Not Authorized",
-                    "message": "Must be a system administrator to perform this action."
-                }
-            }, 403
+        # Not ideal, but this private import is the only way to use core CKAN logic.
+        _identify_user_default()
 
-        substitute_user_id = toolkit.request.headers.get('CKAN-Substitute-User')
+        if toolkit.g.userobj:
 
-        if substitute_user_id:
-            return oht_authn.substitute_user(substitute_user_id)
+            if not toolkit.g.userobj.sysadmin:
+
+                return {
+                    "success": False,
+                    "error": {
+                        "__type": "Not Authorized",
+                        "message": "Must be a system administrator."
+                    }
+                }, 403
+
+            substitute_user_id = toolkit.request.headers.get('CKAN-Substitute-User')
+
+            if substitute_user_id:
+                return oht_authn.substitute_user(substitute_user_id)
