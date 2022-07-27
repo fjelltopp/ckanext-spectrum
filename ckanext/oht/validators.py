@@ -9,6 +9,7 @@ import slugify
 
 @scheming_validator
 def auto_generate_name_from_title(field, schema):
+
     def validator(key, data, errors, context):
 
         if context.get('package'):  # Editing an existing package
@@ -24,18 +25,21 @@ def auto_generate_name_from_title(field, schema):
         title_slug = slugify.slugify(data[('title',)])
         data[key] = title_slug
 
+        # Multiple attempts to keep alpha_id as short as possible
+        # < 1e-42 chance that 10 attempts fail with 1000 duplicate titles
         for counter in range(10):
             package_name_errors = copy.deepcopy(errors)
             package_name_validator(key, data, package_name_errors, context)
+            dataset_name_valid = package_name_errors[key] == errors[key]
 
-            if package_name_errors[key] == errors[key]:
+            if dataset_name_valid:
                 break
 
-            else:
-                alpha_id = ''.join(choice(ascii_lowercase) for i in range(3))
-                data[key] = "{}-{}".format(title_slug, alpha_id)
+            alpha_id = ''.join(choice(ascii_lowercase) for i in range(3))
+            new_dataset_name = "{}-{}".format(title_slug, alpha_id)
+            data[key] = new_dataset_name
 
-        else:  # If we fail after 10 attempts, somthing is wrong
+        else:
             raise ValidationError({'name': [_('Could not autogenerate a unique name.')]})
 
     return validator
