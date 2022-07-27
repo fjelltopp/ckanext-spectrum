@@ -13,7 +13,7 @@ import ckanext.oht.authz as oht_authz
 import ckanext.oht.authn as oht_authn
 import ckanext.oht.upload as oht_upload
 import ckanext.oht.actions as oht_actions
-
+import ckanext.oht.validators as oht_validators
 
 log = logging.getLogger(__name__)
 
@@ -27,6 +27,7 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
     plugins.implements(plugins.IPermissionLabels)
     plugins.implements(plugins.IAuthFunctions)
     plugins.implements(plugins.IActions)
+    plugins.implements(plugins.IValidators)
     plugins.implements(plugins.IPackageController, inherit=True)
     plugins.implements(plugins.IAuthenticator, inherit=True)
 
@@ -94,6 +95,12 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
     def get_actions(self):
         return {
             'user_create': oht_actions.user_create
+        }
+
+    # IValidators
+    def get_validators(self):
+        return {
+            'auto_generate_name_from_title': oht_validators.auto_generate_name_from_title
         }
 
     # IPackageContoller

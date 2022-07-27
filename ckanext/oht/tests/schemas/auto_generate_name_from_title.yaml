@@ -1,0 +1,25 @@
+scheming_version: 2
+dataset_type: auto-generate-name-from-title
+name: Auto Generate NAme From Title
+about: A test schema to test the validator auto_generate_name_from_title
+about_url: http://github.com/ckan/ckanext-scheming
+
+
+dataset_fields:
+
+- field_name: title
+  label: Projection Title
+  preset: title
+  form_placeholder: eg. A descriptive filename
+  validators: not_empty unicode_safe
+
+- field_name: name
+  label: URL
+  validators: auto_generate_name_from_title unicode_safe name_validator package_name_validator
+  preset: dataset_slug
+  form_placeholder: eg. my-dataset
+
+resource_fields:
+
+- field_name: name
+  label: Name
