@@ -4,7 +4,7 @@ import ckan.plugins.toolkit as toolkit
 
 
 @toolkit.chained_auth_function
-def creators_can_manage_collaborators(next_auth, context, data_dict):
+def creators_manage_collaborators(next_auth, context, data_dict):
     """
     Explicitly ensures that dataset creators can always edit collaborators.
     """

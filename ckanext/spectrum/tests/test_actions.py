@@ -2,9 +2,9 @@ import pytest
 import mock
 from zxcvbn import zxcvbn
 from ckan.tests.helpers import call_action
-from ckanext.oht.actions import user_create
+from ckanext.spectrum.actions import user_create
 import ckan.tests.factories as factories
-from ckanext.oht.tests import get_context
+from ckanext.spectrum.tests import get_context
 
 
 DUMMY_PASSWORD = '01234567890123456789012345678901'
@@ -12,7 +12,7 @@ DUMMY_PASSWORD = '01234567890123456789012345678901'
 
 @pytest.fixture
 def mock_token_urlsafe():
-    with mock.patch('ckanext.oht.actions.secrets.token_urlsafe',
+    with mock.patch('ckanext.spectrum.actions.secrets.token_urlsafe',
                     return_value=DUMMY_PASSWORD) as mock_token_urlsafe:
         yield mock_token_urlsafe
 

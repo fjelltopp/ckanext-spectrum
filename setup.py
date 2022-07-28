@@ -11,19 +11,19 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='''ckanext-oht''',
+    name='''ckanext-spectrum''',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # http://packaging.python.org/en/latest/tutorial.html#version
     version='0.0.1',
 
-    description='''Project for CKAN customizations for Avenir Health's One Health Tool Data Repository''',
+    description='''Project for CKAN customizations for Avenir Health's Spectrum CKAN Instance''',
     long_description=long_description,
     long_description_content_type="text/markdown",
 
     # The project's main homepage.
-    url='https://github.com/fjelltopp/ckanext-oht',
+    url='https://github.com/fjelltopp/ckanext-spectrum',
 
     # Author details
     author='''Jonathan Berry''',
@@ -84,7 +84,7 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points='''
         [ckan.plugins]
-        oht=ckanext.oht.plugin:OHTPlugin
+        spectrum=ckanext.spectrum.plugin:SpectrumPlugin
 
         [babel.extractors]
         ckan = ckan.lib.extract:extract_ckan

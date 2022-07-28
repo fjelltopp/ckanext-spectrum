@@ -1,7 +1,7 @@
 import pytest
 from ckan.tests import factories
 from ckan.tests.helpers import call_auth, call_action
-from ckanext.oht.tests import get_context
+from ckanext.spectrum.tests import get_context
 from ckan.plugins import toolkit
 
 
@@ -29,19 +29,19 @@ def datasets(organisation, users):
     return [
         factories.Dataset(
             owner_org=organisation['id'],
-            type='oht',
+            type='spectrum',
             private=True,
             user=users[0]
         ),
         factories.Dataset(
             owner_org=organisation['id'],
-            type='oht',
+            type='spectrum',
             private=True,
             user=users[1]
         ),
         factories.Dataset(
             owner_org=organisation['id'],
-            type='oht',
+            type='spectrum',
             private=False,
             user=users[1]
         )
@@ -52,7 +52,6 @@ def datasets(organisation, users):
 class TestAuth():
 
     def test_users_cant_see_private_datasets(self, users, datasets):
-
         with pytest.raises(toolkit.NotAuthorized):
             call_auth(
                 'package_show',
@@ -61,7 +60,6 @@ class TestAuth():
             )
 
     def test_users_cant_edit_private_datasets(self, users, datasets):
-
         with pytest.raises(toolkit.NotAuthorized):
             call_auth(
                 'package_update',
@@ -117,7 +115,6 @@ class TestAuth():
         )
 
     def test_users_cant_edit_public_datasets(self, users, datasets):
-
         with pytest.raises(toolkit.NotAuthorized):
             call_auth(
                 'package_update',

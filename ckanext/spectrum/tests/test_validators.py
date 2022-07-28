@@ -4,7 +4,7 @@ from ckan.tests.helpers import call_action
 from ckan.plugins.toolkit import ValidationError
 
 
-@pytest.mark.ckan_config("ckan.plugins", "oht scheming_datasets")
+@pytest.mark.ckan_config("ckan.plugins", "spectrum scheming_datasets")
 @pytest.mark.usefixtures("clean_db", "clean_index", "with_plugins")
 class TestAutoGenerateNameFromTitle(object):
 
@@ -46,7 +46,7 @@ class TestAutoGenerateNameFromTitle(object):
         dataset3 = self._create_dataset(name=dataset2["name"])
         assert dataset3["name"] == dataset2["name"]
 
-    @mock.patch("ckanext.oht.validators.choice", return_value="a")
+    @mock.patch("ckanext.spectrum.validators.choice", return_value="a")
     def test_many_failed_generation_attempts(self, mock_choice):
         self._create_dataset()
         self._create_dataset()

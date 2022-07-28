@@ -7,20 +7,20 @@ from ckan.views import _identify_user_default
 import ckanext.blob_storage.helpers as blobstorage_helpers
 from ckan.lib.plugins import DefaultPermissionLabels
 
-from ckanext.oht.helpers import (
+from ckanext.spectrum.helpers import (
     get_dataset_from_id, get_facet_items_dict
 )
-import ckanext.oht.authz as oht_authz
-import ckanext.oht.authn as oht_authn
-import ckanext.oht.upload as oht_upload
-import ckanext.oht.actions as oht_actions
-import ckanext.oht.validators as oht_validators
+import ckanext.spectrum.authz as spectrum_authz
+import ckanext.spectrum.authn as spectrum_authn
+import ckanext.spectrum.upload as spectrum_upload
+import ckanext.spectrum.actions as spectrum_actions
+import ckanext.spectrum.validators as spectrum_validators
 
 
 log = logging.getLogger(__name__)
 
 
-class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
+class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
 
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.IFacets, inherit=True)
@@ -46,7 +46,7 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
     def update_config(self, config_):
         toolkit.add_template_directory(config_, "templates")
         toolkit.add_public_directory(config_, "public")
-        toolkit.add_resource("assets", "oht")
+        toolkit.add_resource("assets", "spectrum")
 
     # IFacets
     def dataset_facets(self, facet_dict, package_type):
@@ -58,11 +58,11 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
 
     # IResourceController
     def before_create(self, context, resource):
-        oht_upload.handle_giftless_uploads(context, resource)
+        spectrum_upload.handle_giftless_uploads(context, resource)
         return resource
 
     def before_update(self, context, current, resource):
-        oht_upload.handle_giftless_uploads(context, resource, current=current)
+        spectrum_upload.handle_giftless_uploads(context, resource, current=current)
         return resource
 
     # IPermissionLabels
@@ -76,7 +76,7 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         identifying the dataset as a member of the parent organisation, and
         replace it with the label identifying the creator user id.
         """
-        labels = set(super(OHTPlugin, self).get_dataset_labels(dataset_obj))
+        labels = set(super(SpectrumPlugin, self).get_dataset_labels(dataset_obj))
 
         if dataset_obj.owner_org:
             labels.discard(f'member-{dataset_obj.owner_org}')
@@ -87,32 +87,32 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
     # IAuthFunctions
     def get_auth_functions(self):
         return {
-            'package_update': oht_authz.package_update,
-            'package_collaborator_create': oht_authz.creators_can_manage_collaborators,
-            'package_collaborator_delete': oht_authz.creators_can_manage_collaborators,
-            'package_collaborator_list': oht_authz.creators_can_manage_collaborators
+            'package_update': spectrum_authz.package_update,
+            'package_collaborator_create': spectrum_authz.creators_manage_collaborators,
+            'package_collaborator_delete': spectrum_authz.creators_manage_collaborators,
+            'package_collaborator_list': spectrum_authz.creators_manage_collaborators
         }
 
     # IActions
     def get_actions(self):
         return {
-            'user_create': oht_actions.user_create
+            'user_create': spectrum_actions.user_create
         }
 
     # IValidators
     def get_validators(self):
         return {
-            'auto_generate_name_from_title': oht_validators.auto_generate_name_from_title
+            'auto_generate_name_from_title': spectrum_validators.generate_name_from_title
         }
 
     # IPackageContoller
     def after_update(self, context, data_dict):
         if data_dict.get('private'):
-            oht_upload.add_activity(context, data_dict, "changed")
+            spectrum_upload.add_activity(context, data_dict, "changed")
 
     def after_create(self, context, data_dict):
         if data_dict.get('private'):
-            oht_upload.add_activity(context, data_dict, "new")
+            spectrum_upload.add_activity(context, data_dict, "new")
 
     # IAuthenticator
     def identify(self):
@@ -128,7 +128,6 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         if toolkit.g.userobj:
 
             if not toolkit.g.userobj.sysadmin:
-
                 return {
                     "success": False,
                     "error": {
@@ -140,4 +139,4 @@ class OHTPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
             substitute_user_id = toolkit.request.headers.get('CKAN-Substitute-User')
 
             if substitute_user_id:
-                return oht_authn.substitute_user(substitute_user_id)
+                return spectrum_authn.substitute_user(substitute_user_id)
