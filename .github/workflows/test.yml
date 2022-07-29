@@ -44,5 +44,5 @@ jobs:
 
         ckan -c test.ini db init
     - name: Run tests
-      run: pytest --ckan-ini=test.ini --cov=ckanext.oht --disable-warnings ckanext/oht
+      run: pytest --ckan-ini=test.ini --cov=ckanext.spectrum --disable-warnings ckanext/spectrum
 

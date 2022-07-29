@@ -8,7 +8,7 @@ import slugify
 
 
 @scheming_validator
-def auto_generate_name_from_title(field, schema):
+def generate_name_from_title(field, schema):
 
     def validator(key, data, errors, context):
 

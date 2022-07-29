@@ -1,12 +1,12 @@
-[![Tests](https://github.com/fjelltopp/ckanext-oht/workflows/Tests/badge.svg?branch=master)](https://github.com/fjelltopp/ckanext-oht/actions)
+[![Tests](https://github.com/fjelltopp/ckanext-spectrum/workflows/Tests/badge.svg?branch=master)](https://github.com/fjelltopp/ckanext-spectrum/actions)
 
-# ckanext-oht
+# ckanext-spectrum
 
-Provides tailored styling and features for CKAN, according to Avenir Health's requirements for their One Health Tool CKAN instance.
+Provides tailored styling and features for CKAN, according to Avenir Health's requirements for their Spectrum CKAN instance.
 
 For further information please see our other docs:
 
-- [OHT CKAN API Documentation](https://documenter.getpostman.com/view/15920939/UzBpK5q9)
+- [Spectrum CKAN API Documentation](https://documenter.getpostman.com/view/15920939/UzBpK5q9)
 
 
 ## Key features
@@ -22,7 +22,7 @@ The following key features are provided by this extension:
 
 ## Installation
 
-To install ckanext-oht:
+To install ckanext-spectrum:
 
 1. Activate your CKAN virtual environment, for example:
 
@@ -30,12 +30,12 @@ To install ckanext-oht:
 
 2. Clone the source and install it on the virtualenv
 
-    git clone https://github.com/fjelltopp/ckanext-oht.git
-    cd ckanext-oht
+    git clone https://github.com/fjelltopp/ckanext-spectrum.git
+    cd ckanext-spectrum
     pip install -e .
 	pip install -r requirements.txt
 
-3. Add `oht` to the `ckan.plugins` setting in your CKAN
+3. Add `spectrum` to the `ckan.plugins` setting in your CKAN
    config file (by default the config file is located at
    `/etc/ckan/default/ckan.ini`).
 
@@ -46,11 +46,11 @@ To install ckanext-oht:
 
 ## Developer installation
 
-To install ckanext-oht for development, activate your CKAN virtualenv and
+To install ckanext-spectrum for development, activate your CKAN virtualenv and
 do:
 
-    git clone https://github.com/fjelltopp/ckanext-oht.git
-    cd ckanext-oht
+    git clone https://github.com/fjelltopp/ckanext-spectrum.git
+    cd ckanext-spectrum
     python setup.py develop
     pip install -r dev-requirements.txt
 

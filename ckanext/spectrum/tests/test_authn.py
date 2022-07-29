@@ -24,7 +24,7 @@ class TestSysadminsOnlyCanAccessAPI():
             'success': False,
             'error': {
                 '__type': 'Not Authorized',
-                'message': "Must be a system administrator to perform this action."
+                'message': "Must be a system administrator."
             }
         }
 

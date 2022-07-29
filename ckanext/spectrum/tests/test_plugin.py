@@ -1,7 +1,7 @@
 import pytest
 from ckan.tests import factories
 from ckan.tests.helpers import call_action
-from ckanext.oht.tests import get_context
+from ckanext.spectrum.tests import get_context
 
 
 @pytest.mark.usefixtures("clean_db")
