@@ -65,3 +65,53 @@ class TestCreateUser():
             include_password_hash=True
         )
         assert response['password_hash']
+
+
+@pytest.fixture
+def dataset():
+    org = factories.Organization()
+    dataset = factories.Dataset(
+        type='auto-generate-name-from-title',
+        id="test-id",
+        owner_org=org['id']
+    )
+    resources = []
+    for i in range(3):
+        resources.append(factories.Resource(package_id=dataset['id']))
+    return call_action('package_show', id=dataset['id'])
+
+
+@pytest.mark.usefixtures('clean_db', 'with_plugins')
+class TestDatasetDuplicate():
+
+    @pytest.mark.parametrize('field', [
+        'title', 'notes', 'private', 'num_resources'
+    ])
+    def test_dataset_metadata_duplicated(self, field, dataset):
+        result = call_action(
+            'dataset_duplicate',
+            id=dataset['id'],
+            name="duplicated-dataset"
+        )
+        assert result[field] == dataset[field]
+
+    @pytest.mark.parametrize('field', ['name', 'id'])
+    def test_dataset_metadata_not_duplicated(self, field, dataset):
+        result = call_action(
+            'dataset_duplicate',
+            id=dataset['id'],
+            name="duplicated-dataset"
+        )
+        assert result[field] != dataset[field]
+
+    @pytest.mark.parametrize('field', ['name'])
+    def test_resource_metadata_duplicated(self, field, dataset):
+        result = call_action(
+            'dataset_duplicate',
+            id=dataset['id'],
+            name="duplicated-dataset"
+        )
+        assert len(dataset['resources']) == len(result['resources'])
+        for i in range(len(dataset['resources'])):
+            duplicated = dataset['resources'][i][field] == result['resources'][i][field]
+            assert duplicated, f"Field {field} did not duplicate for resource {i}"
