@@ -96,7 +96,8 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
     # IActions
     def get_actions(self):
         return {
-            'user_create': spectrum_actions.user_create
+            'user_create': spectrum_actions.user_create,
+            'dataset_duplicate': spectrum_actions.dataset_duplicate
         }
 
     # IValidators
