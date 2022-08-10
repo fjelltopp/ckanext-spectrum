@@ -31,6 +31,11 @@ def dataset_duplicate(context, data_dict):
 
     dataset = {**dataset, **data_dict}
     new_dataset = toolkit.get_action('package_create')(context, dataset)
+    toolkit.get_action('package_relationship_create')(context, {
+        'subject': new_dataset['id'],
+        'object': dataset_id,
+        'type': 'child_of'
+    })
 
     for resource in resources:
         resource['upload'] = _get_resource_file_storage(dataset_id, resource)
