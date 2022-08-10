@@ -24,7 +24,6 @@ def dataset_duplicate(context, data_dict):
     dataset_id = dataset['id']
     resources = dataset.pop('resources', [])
 
-    del dataset['id']
     del dataset['name']
     del data_dict['id']
     del context['package']
@@ -33,18 +32,23 @@ def dataset_duplicate(context, data_dict):
     new_dataset = toolkit.get_action('package_create')(context, dataset)
 
     for resource in resources:
-        filename = resource.get('url', "").split('/')[-1]
-        blob_storage_response = download(dataset_id, resource['id'], filename)
-        file_response = requests.get(blob_storage_response.headers.get('Location'), stream=True)
-        file_object = FileStorage(BytesIO(file_response.content), filename, 'upload')
+        resource['upload'] = _get_resource_file_storage(dataset_id, resource)
+        resource['package_id'] = new_dataset['id']
 
+        del resource['id']
         del resource['size']
         del resource['sha256']
         del resource['lfs_prefix']
         del resource['url']
 
-        resource['package_id'] = new_dataset['id']
-        resource['upload'] = file_object
         toolkit.get_action('resource_create')(context, resource)
 
     return toolkit.get_action('package_show')(context, {'id': new_dataset['id']})
+
+
+def _get_resource_file_storage(dataset_id, resource):
+    filename = resource.get('url', "").split('/')[-1]
+    blob_storage_response = download(dataset_id, resource['id'], filename)
+    file_location = blob_storage_response.headers.get('Location')
+    file_response = requests.get(file_location, stream=True)
+    return FileStorage(BytesIO(file_response.content), filename, 'upload')
