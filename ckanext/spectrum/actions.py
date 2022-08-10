@@ -24,6 +24,7 @@ def dataset_duplicate(context, data_dict):
     dataset_id = dataset['id']
     resources = dataset.pop('resources', [])
 
+    del dataset['id']
     del dataset['name']
     del data_dict['id']
     del context['package']
