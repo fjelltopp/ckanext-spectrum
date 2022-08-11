@@ -38,7 +38,8 @@ def dataset_duplicate(context, data_dict):
     })
 
     for resource in resources:
-        resource['upload'] = _get_resource_file_storage(dataset_id, resource)
+        filename = resource.get('url', "").split('/')[-1]
+        resource['upload'] = _get_resource_upload(dataset_id, resource['id'], filename)
         resource['package_id'] = new_dataset['id']
 
         del resource['id']
@@ -52,9 +53,11 @@ def dataset_duplicate(context, data_dict):
     return toolkit.get_action('package_show')(context, {'id': new_dataset['id']})
 
 
-def _get_resource_file_storage(dataset_id, resource):
-    filename = resource.get('url', "").split('/')[-1]
-    blob_storage_response = download(dataset_id, resource['id'], filename)
-    file_location = blob_storage_response.headers.get('Location')
-    file_response = requests.get(file_location, stream=True)
-    return FileStorage(BytesIO(file_response.content), filename, 'upload')
+def _get_resource_upload(dataset_id, resource_id, filename):
+    download_response = download(dataset_id, resource_id, filename)
+
+    while str(download_response.status_code)[0] == '3':  # Redirected
+        redirect_url = download_response.headers.get('Location')
+        download_response = requests.get(redirect_url, stream=True)
+
+    return FileStorage(BytesIO(download_response.content), filename, 'upload')
