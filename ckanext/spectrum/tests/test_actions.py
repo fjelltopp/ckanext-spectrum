@@ -5,6 +5,8 @@ from ckan.tests.helpers import call_action
 from ckanext.spectrum.actions import user_create
 import ckan.tests.factories as factories
 from ckanext.spectrum.tests import get_context
+from werkzeug.datastructures import FileStorage
+from io import StringIO
 
 
 DUMMY_PASSWORD = '01234567890123456789012345678901'
@@ -81,13 +83,20 @@ def dataset():
     return call_action('package_show', id=dataset['id'])
 
 
+@pytest.fixture
+def mock_file():
+    function_name = "ckanext.spectrum.actions._get_resource_upload"
+    with mock.patch(function_name, return_value=None):
+        yield
+
+
 @pytest.mark.usefixtures('clean_db', 'with_plugins')
 class TestDatasetDuplicate():
 
     @pytest.mark.parametrize('field', [
         'title', 'notes', 'private', 'num_resources'
     ])
-    def test_dataset_metadata_duplicated(self, field, dataset):
+    def test_dataset_metadata_duplicated(self, field, dataset, mock_file):
         result = call_action(
             'dataset_duplicate',
             id=dataset['id'],
@@ -96,7 +105,7 @@ class TestDatasetDuplicate():
         assert result[field] == dataset[field]
 
     @pytest.mark.parametrize('field', ['name', 'id'])
-    def test_dataset_metadata_not_duplicated(self, field, dataset):
+    def test_dataset_metadata_not_duplicated(self, field, dataset, mock_file):
         result = call_action(
             'dataset_duplicate',
             id=dataset['id'],
@@ -105,7 +114,7 @@ class TestDatasetDuplicate():
         assert result[field] != dataset[field]
 
     @pytest.mark.parametrize('field', ['name'])
-    def test_resource_metadata_duplicated(self, field, dataset):
+    def test_resource_metadata_duplicated(self, field, dataset, mock_file):
         result = call_action(
             'dataset_duplicate',
             id=dataset['id'],

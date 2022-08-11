@@ -24,10 +24,10 @@ def dataset_duplicate(context, data_dict):
     dataset_id = dataset['id']
     resources = dataset.pop('resources', [])
 
-    del dataset['id']
-    del dataset['name']
-    del data_dict['id']
-    del context['package']
+    dataset.pop('id', None)
+    dataset.pop('name', None)
+    data_dict.pop('id', None)
+    context.pop('package', None)
 
     dataset = {**dataset, **data_dict}
     new_dataset = toolkit.get_action('package_create')(context, dataset)
@@ -42,11 +42,11 @@ def dataset_duplicate(context, data_dict):
         resource['upload'] = _get_resource_upload(dataset_id, resource['id'], filename)
         resource['package_id'] = new_dataset['id']
 
-        del resource['id']
-        del resource['size']
-        del resource['sha256']
-        del resource['lfs_prefix']
-        del resource['url']
+        resource.pop('id', None)
+        resource.pop('size', None)
+        resource.pop('sha256', None)
+        resource.pop('lfs_prefix', None)
+        resource.pop('url', None)
 
         toolkit.get_action('resource_create')(context, resource)
 
