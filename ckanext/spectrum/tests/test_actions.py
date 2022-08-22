@@ -133,3 +133,18 @@ class TestDatasetDuplicate():
                 id='non-existant-id',
                 name="duplicated-dataset"
             )
+
+    @pytest.mark.parametrize('key, value', [
+        ('notes', 'Some new notes'),
+        ('title', 'A new title'),
+        ('private', True),
+        ('resources', [])
+    ])
+    def test_metadata_overidden(self, key, value, mock_file, dataset):
+        data_dict = {
+            'id': dataset['id'],
+            'name': "duplicated-dataset",
+            key: value
+        }
+        result = call_action('dataset_duplicate', **data_dict)
+        assert result[key] == value

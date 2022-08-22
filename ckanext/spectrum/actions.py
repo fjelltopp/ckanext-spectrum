@@ -21,9 +21,7 @@ def user_create(next_action, context, data_dict):
 def dataset_duplicate(context, data_dict):
     dataset_id_or_name = toolkit.get_or_bust(data_dict, 'id')
     dataset = toolkit.get_action('package_show')(context, {'id': dataset_id_or_name})
-
     dataset_id = dataset['id']
-    resources = dataset.pop('resources', [])
 
     dataset.pop('id', None)
     dataset.pop('name', None)
@@ -31,6 +29,8 @@ def dataset_duplicate(context, data_dict):
     context.pop('package', None)
 
     dataset = {**dataset, **data_dict}
+    resources = dataset.pop('resources', [])
+
     new_dataset = toolkit.get_action('package_create')(context, dataset)
     toolkit.get_action('package_relationship_create')(context, {
         'subject': new_dataset['id'],

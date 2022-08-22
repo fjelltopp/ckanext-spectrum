@@ -10,7 +10,8 @@ log = logging.getLogger(__name__)
 
 
 def add_activity(context, data_dict, activity_type):
-    user_id = context['model'].User.by_name(context['user']).id
+    user = context['model'].User.by_name(context['user'])
+    user_id = getattr(user, 'id', "UnknownUser")
     package = context.get("package", context['model'].Package.get(data_dict["name"]))
     activity = package.activity_stream_item(activity_type, user_id)
     context['session'].add(activity)
