@@ -5,6 +5,7 @@ from ckan.tests.helpers import call_action
 from ckanext.spectrum.actions import user_create
 import ckan.tests.factories as factories
 from ckanext.spectrum.tests import get_context
+from ckan.plugins import toolkit
 
 
 DUMMY_PASSWORD = '01234567890123456789012345678901'
@@ -65,3 +66,85 @@ class TestCreateUser():
             include_password_hash=True
         )
         assert response['password_hash']
+
+
+@pytest.fixture
+def dataset():
+    org = factories.Organization()
+    dataset = factories.Dataset(
+        type='auto-generate-name-from-title',
+        id="test-id",
+        owner_org=org['id']
+    )
+    resources = []
+    for i in range(3):
+        resources.append(factories.Resource(package_id=dataset['id']))
+    return call_action('package_show', id=dataset['id'])
+
+
+@pytest.fixture
+def mock_file():
+    function_name = "ckanext.spectrum.actions._get_resource_upload"
+    with mock.patch(function_name, return_value=None):
+        yield
+
+
+@pytest.mark.usefixtures('clean_db', 'with_plugins')
+class TestDatasetDuplicate():
+
+    def test_dataset_metadata_duplicated(self, dataset, mock_file):
+        result = call_action(
+            'dataset_duplicate',
+            id=dataset['id'],
+            name="duplicated-dataset"
+        )
+        fields = ['title', 'notes', 'private', 'num_resources']
+        duplicated = [result[field] == dataset[field] for field in fields]
+        assert all(duplicated), f"Duplication failed: {zip(fields, duplicated)}"
+
+    def test_dataset_metadata_not_duplicated(self, dataset, mock_file):
+        result = call_action(
+            'dataset_duplicate',
+            id=dataset['id'],
+            name="duplicated-dataset"
+        )
+        fields = ['name', 'id']
+        not_duplicated = [result[field] != dataset[field] for field in fields]
+        assert all(not_duplicated), f"Duplication occured: {zip(fields, not_duplicated)}"
+
+    def test_resource_metadata_duplicated(self, dataset, mock_file):
+        result = call_action(
+            'dataset_duplicate',
+            id=dataset['id'],
+            name="duplicated-dataset"
+        )
+        assert len(dataset['resources']) == len(result['resources'])
+        fields = ['name']
+
+        for i in range(len(dataset['resources'])):
+            for f in fields:
+                duplicated = dataset['resources'][i][f] == result['resources'][i][f]
+                assert duplicated, f"Field {f} did not duplicate for resource {i}"
+
+    def test_dataset_not_found(self, mock_file):
+        with pytest.raises(toolkit.ObjectNotFound):
+            call_action(
+                'dataset_duplicate',
+                id='non-existant-id',
+                name="duplicated-dataset"
+            )
+
+    @pytest.mark.parametrize('key, value', [
+        ('notes', 'Some new notes'),
+        ('title', 'A new title'),
+        ('private', True),
+        ('resources', [])
+    ])
+    def test_metadata_overidden(self, key, value, mock_file, dataset):
+        data_dict = {
+            'id': dataset['id'],
+            'name': "duplicated-dataset",
+            key: value
+        }
+        result = call_action('dataset_duplicate', **data_dict)
+        assert result[key] == value
