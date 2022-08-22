@@ -21,6 +21,7 @@ def user_create(next_action, context, data_dict):
 def dataset_duplicate(context, data_dict):
     dataset_id_or_name = toolkit.get_or_bust(data_dict, 'id')
     dataset = toolkit.get_action('package_show')(context, {'id': dataset_id_or_name})
+
     dataset_id = dataset['id']
     resources = dataset.pop('resources', [])
 
@@ -38,23 +39,27 @@ def dataset_duplicate(context, data_dict):
     })
 
     for resource in resources:
-        filename = resource.get('url', "").split('/')[-1]
-        resource['upload'] = _get_resource_upload(dataset_id, resource['id'], filename)
-        resource['package_id'] = new_dataset['id']
-
-        resource.pop('id', None)
-        resource.pop('size', None)
-        resource.pop('sha256', None)
-        resource.pop('lfs_prefix', None)
-        resource.pop('url', None)
-
-        toolkit.get_action('resource_create')(context, resource)
+        _duplicate_resource(context, resource, new_dataset['id'])
 
     return toolkit.get_action('package_show')(context, {'id': new_dataset['id']})
 
 
-def _get_resource_upload(dataset_id, resource_id, filename):
-    download_response = download(dataset_id, resource_id, filename)
+def _duplicate_resource(context, resource, new_dataset_id):
+    resource['upload'] = _get_resource_upload(resource)
+    resource['package_id'] = new_dataset_id
+
+    resource.pop('id', None)
+    resource.pop('size', None)
+    resource.pop('sha256', None)
+    resource.pop('lfs_prefix', None)
+    resource.pop('url', None)
+
+    toolkit.get_action('resource_create')(context, resource)
+
+
+def _get_resource_upload(resource):
+    filename = resource.get('url', "").split('/')[-1]
+    download_response = download(resource['package_id'], resource['id'], filename)
 
     while str(download_response.status_code)[0] == '3':  # Redirected
         redirect_url = download_response.headers.get('Location')
