@@ -92,37 +92,39 @@ def mock_file():
 @pytest.mark.usefixtures('clean_db', 'with_plugins')
 class TestDatasetDuplicate():
 
-    @pytest.mark.parametrize('field', [
-        'title', 'notes', 'private', 'num_resources'
-    ])
-    def test_dataset_metadata_duplicated(self, field, dataset, mock_file):
+    def test_dataset_metadata_duplicated(self, dataset, mock_file):
         result = call_action(
             'dataset_duplicate',
             id=dataset['id'],
             name="duplicated-dataset"
         )
-        assert result[field] == dataset[field]
+        fields = ['title', 'notes', 'private', 'num_resources']
+        duplicated = [result[field] == dataset[field] for field in fields]
+        assert all(duplicated), f"Duplication failed: {zip(fields, duplicated)}"
 
-    @pytest.mark.parametrize('field', ['name', 'id'])
-    def test_dataset_metadata_not_duplicated(self, field, dataset, mock_file):
+    def test_dataset_metadata_not_duplicated(self, dataset, mock_file):
         result = call_action(
             'dataset_duplicate',
             id=dataset['id'],
             name="duplicated-dataset"
         )
-        assert result[field] != dataset[field]
+        fields = ['name', 'id']
+        not_duplicated = [result[field] != dataset[field] for field in fields]
+        assert all(not_duplicated), f"Duplication occured: {zip(fields, not_duplicated)}"
 
-    @pytest.mark.parametrize('field', ['name'])
-    def test_resource_metadata_duplicated(self, field, dataset, mock_file):
+    def test_resource_metadata_duplicated(self, dataset, mock_file):
         result = call_action(
             'dataset_duplicate',
             id=dataset['id'],
             name="duplicated-dataset"
         )
         assert len(dataset['resources']) == len(result['resources'])
+        fields = ['name']
+
         for i in range(len(dataset['resources'])):
-            duplicated = dataset['resources'][i][field] == result['resources'][i][field]
-            assert duplicated, f"Field {field} did not duplicate for resource {i}"
+            for f in fields:
+                duplicated = dataset['resources'][i][f] == result['resources'][i][f]
+                assert duplicated, f"Field {f} did not duplicate for resource {i}"
 
     def test_dataset_not_found(self, mock_file):
         with pytest.raises(toolkit.ObjectNotFound):
