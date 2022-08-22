@@ -5,8 +5,7 @@ from ckan.tests.helpers import call_action
 from ckanext.spectrum.actions import user_create
 import ckan.tests.factories as factories
 from ckanext.spectrum.tests import get_context
-from werkzeug.datastructures import FileStorage
-from io import StringIO
+from ckan.plugins import toolkit
 
 
 DUMMY_PASSWORD = '01234567890123456789012345678901'
@@ -124,3 +123,11 @@ class TestDatasetDuplicate():
         for i in range(len(dataset['resources'])):
             duplicated = dataset['resources'][i][field] == result['resources'][i][field]
             assert duplicated, f"Field {field} did not duplicate for resource {i}"
+
+    def test_dataset_not_found(self, mock_file):
+        with pytest.raises(toolkit.ObjectNotFound):
+            call_action(
+                'dataset_duplicate',
+                id='non-existant-id',
+                name="duplicated-dataset"
+            )
