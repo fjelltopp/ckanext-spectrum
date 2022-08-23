@@ -161,7 +161,7 @@ class TestDatasetDuplicate():
             id=dataset1['id'],
             id2=dataset2['id']
         )
-        assert relationships_list[0]['subject'] == 'test_dataset_00'
+        assert relationships_list[0]['subject'] == dataset1['name']
         assert relationships_list[0]['type'] == 'parent_of'
-        assert relationships_list[0]['object'] == 'test_dataset_01'
+        assert relationships_list[0]['object'] == dataset2['name']
         assert relationships_list[0]['comment'].startswith('Duplicated from activity ')
