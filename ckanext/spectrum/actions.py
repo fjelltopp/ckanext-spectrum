@@ -1,9 +1,8 @@
 import ckan.plugins.toolkit as toolkit
-from ckanext.blob_storage.blueprints import download
-from werkzeug.datastructures import FileStorage
-from io import BytesIO
 import secrets
-import requests
+import logging
+
+log = logging.getLogger(__name__)
 
 
 @toolkit.chained_action
@@ -29,40 +28,38 @@ def dataset_duplicate(context, data_dict):
     context.pop('package', None)
 
     dataset = {**dataset, **data_dict}
-    resources = dataset.pop('resources', [])
 
-    new_dataset = toolkit.get_action('package_create')(context, dataset)
-    toolkit.get_action('package_relationship_create')(context, {
-        'subject': new_dataset['id'],
+    for resource in dataset.get('resources', []):
+        del resource['id']
+        del resource['package_id']
+
+    duplicate_dataset = toolkit.get_action('package_create')(context, dataset)
+    _record_dataset_duplication(dataset_id, duplicate_dataset['id'], context)
+
+    return toolkit.get_action('package_show')(context, {'id': duplicate_dataset['id']})
+
+
+def _record_dataset_duplication(dataset_id, new_dataset_id, context):
+    # We should probably use activities to record duplication in CKAN 2.10
+
+    relationship = {
+        'subject': new_dataset_id,
         'object': dataset_id,
         'type': 'child_of'
-    })
+    }
 
-    for resource in resources:
-        _duplicate_resource(context, resource, new_dataset['id'])
+    try:
+        current_activity_id = toolkit.get_action('package_activity_list')(
+            context,
+            {'id': dataset_id}
+        )[0]['id']
+        relationship['comment'] = f"Duplicated from activity {current_activity_id}"
+    except Exception as e:
+        log.error(f"Failed to get current activity for package {dataset_id} ...")
+        log.exception(e)
 
-    return toolkit.get_action('package_show')(context, {'id': new_dataset['id']})
-
-
-def _duplicate_resource(context, resource, new_dataset_id):
-    resource['upload'] = _get_resource_upload(resource)
-    resource['package_id'] = new_dataset_id
-
-    resource.pop('id', None)
-    resource.pop('size', None)
-    resource.pop('sha256', None)
-    resource.pop('lfs_prefix', None)
-    resource.pop('url', None)
-
-    toolkit.get_action('resource_create')(context, resource)
-
-
-def _get_resource_upload(resource):
-    filename = resource.get('url', "").split('/')[-1]
-    download_response = download(resource['package_id'], resource['id'], filename)
-
-    while str(download_response.status_code)[0] == '3':  # Redirected
-        redirect_url = download_response.headers.get('Location')
-        download_response = requests.get(redirect_url, stream=True)
-
-    return FileStorage(BytesIO(download_response.content), filename, 'upload')
+    try:
+        toolkit.get_action('package_relationship_create')(context, relationship)
+    except Exception as e:
+        log.error(f"Failed to record duplication of {dataset_id} to {new_dataset_id} ...")
+        log.exception(e)
