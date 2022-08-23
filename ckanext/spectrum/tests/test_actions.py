@@ -2,7 +2,7 @@ import pytest
 import mock
 from zxcvbn import zxcvbn
 from ckan.tests.helpers import call_action
-from ckanext.spectrum.actions import user_create
+from ckanext.spectrum.actions import user_create, _record_dataset_duplication
 import ckan.tests.factories as factories
 from ckanext.spectrum.tests import get_context
 from ckan.plugins import toolkit
@@ -82,17 +82,10 @@ def dataset():
     return call_action('package_show', id=dataset['id'])
 
 
-@pytest.fixture
-def mock_file():
-    function_name = "ckanext.spectrum.actions._get_resource_upload"
-    with mock.patch(function_name, return_value=None):
-        yield
-
-
 @pytest.mark.usefixtures('clean_db', 'with_plugins')
 class TestDatasetDuplicate():
 
-    def test_dataset_metadata_duplicated(self, dataset, mock_file):
+    def test_dataset_metadata_duplicated(self, dataset):
         result = call_action(
             'dataset_duplicate',
             id=dataset['id'],
@@ -102,7 +95,7 @@ class TestDatasetDuplicate():
         duplicated = [result[field] == dataset[field] for field in fields]
         assert all(duplicated), f"Duplication failed: {zip(fields, duplicated)}"
 
-    def test_dataset_metadata_not_duplicated(self, dataset, mock_file):
+    def test_dataset_metadata_not_duplicated(self, dataset):
         result = call_action(
             'dataset_duplicate',
             id=dataset['id'],
@@ -112,7 +105,7 @@ class TestDatasetDuplicate():
         not_duplicated = [result[field] != dataset[field] for field in fields]
         assert all(not_duplicated), f"Duplication occured: {zip(fields, not_duplicated)}"
 
-    def test_resource_metadata_duplicated(self, dataset, mock_file):
+    def test_resource_metadata_duplicated(self, dataset):
         result = call_action(
             'dataset_duplicate',
             id=dataset['id'],
@@ -126,7 +119,7 @@ class TestDatasetDuplicate():
                 duplicated = dataset['resources'][i][f] == result['resources'][i][f]
                 assert duplicated, f"Field {f} did not duplicate for resource {i}"
 
-    def test_dataset_not_found(self, mock_file):
+    def test_dataset_not_found(self):
         with pytest.raises(toolkit.ObjectNotFound):
             call_action(
                 'dataset_duplicate',
@@ -140,7 +133,7 @@ class TestDatasetDuplicate():
         ('private', True),
         ('resources', [])
     ])
-    def test_metadata_overidden(self, key, value, mock_file, dataset):
+    def test_metadata_overidden(self, key, value, dataset):
         data_dict = {
             'id': dataset['id'],
             'name': "duplicated-dataset",
@@ -148,3 +141,27 @@ class TestDatasetDuplicate():
         }
         result = call_action('dataset_duplicate', **data_dict)
         assert result[key] == value
+
+    def test_record_duplication(self):
+        user = factories.User()
+        dataset1 = factories.Dataset(user=user)
+        dataset2 = factories.Dataset(user=user)
+        call_action(
+            'package_patch',
+            id=dataset1['id'],
+            title='New Title To Create Activity ID'
+        )
+        _record_dataset_duplication(
+            dataset1['id'],
+            dataset2['id'],
+            get_context(user['name'])
+        )
+        relationships_list = call_action(
+            'package_relationships_list',
+            id=dataset1['id'],
+            id2=dataset2['id']
+        )
+        assert relationships_list[0]['subject'] == 'test_dataset_00'
+        assert relationships_list[0]['type'] == 'parent_of'
+        assert relationships_list[0]['object'] == 'test_dataset_01'
+        assert relationships_list[0]['comment'].startswith('Duplicated from activity ')
