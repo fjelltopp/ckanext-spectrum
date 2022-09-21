@@ -6,7 +6,6 @@ import ckan.lib.uploader as uploader
 from ckan.views import _identify_user_default
 import ckanext.blob_storage.helpers as blobstorage_helpers
 from ckan.lib.plugins import DefaultPermissionLabels
-
 from ckanext.spectrum.helpers import (
     get_dataset_from_id, get_facet_items_dict
 )
@@ -15,7 +14,7 @@ import ckanext.spectrum.authn as spectrum_authn
 import ckanext.spectrum.upload as spectrum_upload
 import ckanext.spectrum.actions as spectrum_actions
 import ckanext.spectrum.validators as spectrum_validators
-
+from flask import request
 
 log = logging.getLogger(__name__)
 
@@ -118,17 +117,18 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
     # IAuthenticator
     def identify(self):
         """
-        Allows sysadmins to send requests "on behalf" of a substitute user. This is
+        Requires all API requests to be made by a registered sysadmin user.
+
+        Allows API requests to be sent "on behalf" of a substitute user. This is
         done by setting a HTTP Header in the requests "CKAN-Substitute-User" to be the
         username or user id of another CKAN user.
         """
 
-        # Not ideal, but this private import is the only way to use core CKAN logic.
-        _identify_user_default()
+        if request.path.startswith('/api/'):
+            # Not ideal, but this private import is the only way to use core CKAN logic.
+            _identify_user_default()
 
-        if toolkit.g.userobj:
-
-            if not toolkit.g.userobj.sysadmin:
+            if not getattr(toolkit.g.userobj, 'sysadmin', False):
                 return {
                     "success": False,
                     "error": {
