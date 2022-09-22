@@ -4,6 +4,7 @@ import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 import ckan.lib.uploader as uploader
 from ckan.views import _identify_user_default
+from ckan.authz import is_sysadmin
 import ckanext.blob_storage.helpers as blobstorage_helpers
 from ckan.lib.plugins import DefaultPermissionLabels
 from ckanext.spectrum.helpers import (
@@ -14,7 +15,7 @@ import ckanext.spectrum.authn as spectrum_authn
 import ckanext.spectrum.upload as spectrum_upload
 import ckanext.spectrum.actions as spectrum_actions
 import ckanext.spectrum.validators as spectrum_validators
-from flask import request
+
 
 log = logging.getLogger(__name__)
 
@@ -124,11 +125,11 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         username or user id of another CKAN user.
         """
 
-        if request.path.startswith('/api/'):
+        if toolkit.request.path.startswith('/api/'):
             # Not ideal, but this private import is the only way to use core CKAN logic.
             _identify_user_default()
 
-            if not getattr(toolkit.g.userobj, 'sysadmin', False):
+            if not is_sysadmin(getattr(toolkit.g, 'user', '')):
                 return {
                     "success": False,
                     "error": {
