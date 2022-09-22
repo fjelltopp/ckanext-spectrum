@@ -28,6 +28,27 @@ class TestSysadminsOnlyCanAccessAPI():
             }
         }
 
+    @pytest.mark.parametrize('action', [
+        ('user_show'),
+        ('package_list'),
+        ('package_search'),
+        ('user_list'),
+        ('dataset_duplicate'),
+        ('user_create')
+    ])
+    def test_api_endpoints_require_registered_user(self, app, action):
+        response = app.get(
+            toolkit.url_for('api.action', ver=3, logic_function=action),
+        )
+        assert response.status_code == 403
+        assert response.json == {
+            'success': False,
+            'error': {
+                '__type': 'Not Authorized',
+                'message': "Must be a system administrator."
+            }
+        }
+
 
 @pytest.mark.usefixtures("clean_db")
 class TestSubstituteUser():

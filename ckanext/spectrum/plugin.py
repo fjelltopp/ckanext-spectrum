@@ -4,9 +4,9 @@ import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 import ckan.lib.uploader as uploader
 from ckan.views import _identify_user_default
+from ckan.authz import is_sysadmin
 import ckanext.blob_storage.helpers as blobstorage_helpers
 from ckan.lib.plugins import DefaultPermissionLabels
-
 from ckanext.spectrum.helpers import (
     get_dataset_from_id, get_facet_items_dict
 )
@@ -118,17 +118,18 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
     # IAuthenticator
     def identify(self):
         """
-        Allows sysadmins to send requests "on behalf" of a substitute user. This is
+        Requires all API requests to be made by a registered sysadmin user.
+
+        Allows API requests to be sent "on behalf" of a substitute user. This is
         done by setting a HTTP Header in the requests "CKAN-Substitute-User" to be the
         username or user id of another CKAN user.
         """
 
-        # Not ideal, but this private import is the only way to use core CKAN logic.
-        _identify_user_default()
+        if toolkit.request.path.startswith('/api/'):
+            # Private import is only way to set g.userobj using core CKAN.
+            _identify_user_default()
 
-        if toolkit.g.userobj:
-
-            if not toolkit.g.userobj.sysadmin:
+            if not toolkit.g.userobj or not toolkit.g.userobj.sysadmin:
                 return {
                     "success": False,
                     "error": {
