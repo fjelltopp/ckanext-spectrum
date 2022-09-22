@@ -38,7 +38,7 @@ class TestSysadminsOnlyCanAccessAPI():
     ])
     def test_api_endpoints_require_registered_user(self, app, action):
         response = app.get(
-            toolkit.url_for('api.action', ver=3, logic_function=action),
+            toolkit.url_for('api.action', ver=3, logic_function=action)
         )
         assert response.status_code == 403
         assert response.json == {
