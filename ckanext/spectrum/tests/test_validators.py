@@ -2,6 +2,7 @@ import pytest
 import mock
 from ckan.tests.helpers import call_action
 from ckan.plugins.toolkit import ValidationError
+import ckan.tests.factories as factories
 
 
 @pytest.mark.ckan_config("ckan.plugins", "spectrum scheming_datasets")
@@ -56,3 +57,22 @@ class TestAutoGenerateNameFromTitle(object):
     def test_missing_title(self):
         with pytest.raises(ValidationError, match="title.*Missing value"):
             call_action("package_create", type="auto-generate-name-from-title")
+
+
+@pytest.mark.usefixtures("clean_db", 'with_plugins')
+class TestUserIDValidator(object):
+
+    def test_user_id_uniqueness(self):
+        factories.User(id='test-id')
+        with pytest.raises(ValidationError, match="ID is not available"):
+            factories.User(id='test-id')
+
+    def test_user_can_be_updated(self):
+        user = factories.User(id='test-id')
+        user['email'] = "newemail@test.org"
+        assert call_action('user_update', **user)
+
+    def test_id_cannot_match_existing_username(self):
+        factories.User(name='test-id')
+        with pytest.raises(ValidationError, match="ID is not available"):
+            factories.User(id='test-id')
