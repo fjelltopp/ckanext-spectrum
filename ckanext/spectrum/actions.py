@@ -89,8 +89,7 @@ def _get_random_username_from_email(email, model):
 
     WARNING: This logic reveals part of the user's email address
     as their username.  Fjelltopp recommends overriding this logic
-    for public CKAN instances. Use the IEmailAsUsername plugin
-    interface to do this.
+    for public CKAN instances.
     """
 
     localpart = email.split('@')[0]
