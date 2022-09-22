@@ -46,7 +46,6 @@ def user_create(next_action, context, data_dict):
 
     email = data_dict['email']
     username = _get_random_username_from_email(email, context['model'])
-
     data_dict['name'] = username
 
     return next_action(context, data_dict)
