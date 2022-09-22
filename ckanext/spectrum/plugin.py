@@ -126,10 +126,10 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         """
 
         if toolkit.request.path.startswith('/api/'):
-            # Not ideal, but this private import is the only way to use core CKAN logic.
+            # Private import is only way to set g.userobj using core CKAN.
             _identify_user_default()
 
-            if not is_sysadmin(getattr(toolkit.g, 'user', '')):
+            if not toolkit.g.userobj or not toolkit.g.userobj.sysadmin:
                 return {
                     "success": False,
                     "error": {
