@@ -5,6 +5,7 @@ import ckan.plugins.toolkit as toolkit
 import ckan.lib.uploader as uploader
 from ckan.views import _identify_user_default
 from ckan.authz import is_sysadmin
+import ckan.logic.schema as schema
 import ckanext.blob_storage.helpers as blobstorage_helpers
 from ckan.lib.plugins import DefaultPermissionLabels
 from ckanext.spectrum.helpers import (
@@ -47,6 +48,8 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         toolkit.add_template_directory(config_, "templates")
         toolkit.add_public_directory(config_, "public")
         toolkit.add_resource("assets", "spectrum")
+        if (schema.default_user_schema.__name__ != 'spectrum_user_schema'):
+            schema.default_user_schema = alter_user_schema(schema.default_user_schema)
 
     # IFacets
     def dataset_facets(self, facet_dict, package_type):
@@ -103,7 +106,8 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
     # IValidators
     def get_validators(self):
         return {
-            'auto_generate_name_from_title': spectrum_validators.generate_name_from_title
+            'auto_generate_name_from_title': spectrum_validators.generate_name_from_title,
+            'user_id_validator': spectrum_validators.user_id_validator
         }
 
     # IPackageContoller
@@ -142,3 +146,13 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
 
             if substitute_user_id:
                 return spectrum_authn.substitute_user(substitute_user_id)
+
+
+def alter_user_schema(default_user_schema):
+    @schema.validator_args
+    def spectrum_user_schema(email_is_unique, user_id_validator):
+        spectrum_user_schema = default_user_schema()
+        spectrum_user_schema['id'].append(user_id_validator)
+        spectrum_user_schema['email'].remove(email_is_unique)
+        return spectrum_user_schema
+    return spectrum_user_schema
