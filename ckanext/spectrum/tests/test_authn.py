@@ -83,7 +83,8 @@ class TestSubstituteUser():
             }
         }
 
-    def test_valid_substitute_user_request(self, app):
+    @pytest.mark.parametrize("user_field", ["id", "name"])
+    def test_valid_substitute_user_request(self, app, user_field):
         sysadmin_user = factories.User(sysadmin=True)
         substitute_user = factories.User()
         dataset = factories.Dataset()
@@ -98,7 +99,7 @@ class TestSubstituteUser():
             json={'name': 'test-dataset'},
             headers={
                 'Authorization': sysadmin_user['apikey'],
-                'CKAN-Substitute-User': substitute_user['name']
+                'CKAN-Substitute-User': substitute_user[user_field]
             }
         )
         assert response.status_code == 200
