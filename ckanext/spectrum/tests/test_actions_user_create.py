@@ -44,14 +44,14 @@ class TestCreateUser():
         data_dict = {
             'email': 'test@test.org'
         }
-        mock_context = {'model': None}
-        user_create(next_action, mock_context, data_dict)
+        context = get_context(user)
+        user_create(next_action, context, data_dict)
         expected_data_dict = {
             **data_dict,
             'password': DUMMY_PASSWORD,
             'name': DUMMY_USERNAME
         }
-        next_action.assert_called_once_with(mock_context, expected_data_dict)
+        next_action.assert_called_once_with(context, expected_data_dict)
 
     def test_auto_generated_password_is_strong(self):
         next_action = mock.Mock()
@@ -65,7 +65,23 @@ class TestCreateUser():
         assert zxcvbn(generated_password)['score'] == 4
 
     def test_newly_created_user_is_org_editor(self):
-        pass
+        spectrum_org = factories.Organization(name="spectrum")
+        user = call_action(
+            'user_create',
+            email='test@test.org'
+        )
+        user_orgs = call_action('organization_list_for_user', id=user['id'], permission='create_dataset')
+        assert len(user_orgs) == 1
+        assert spectrum_org["name"] in [org["name"] for org in user_orgs]
+
+    def test_user_create_works_if_no_spectrum_org_present(self):
+        user = call_action(
+            'user_create',
+            email='test@test.org'
+        )
+        assert user['email'] == 'test@test.org'
+
+
 
     def test_integration(self):
         response = call_action(
