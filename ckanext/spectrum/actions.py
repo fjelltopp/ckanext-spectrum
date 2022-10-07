@@ -48,7 +48,17 @@ def user_create(next_action, context, data_dict):
     username = _get_random_username_from_email(email, context['model'])
     data_dict['name'] = username
 
-    return next_action(context, data_dict)
+    created_user = next_action(context, data_dict)
+
+    default_org_name = toolkit.config.get('ckanext.spectrum.default_organization', 'spectrum')
+    org_member_dict = {'id': default_org_name, 'username': created_user['name'], 'role': 'editor'}
+    try:
+        ignore_auth_context = {"user": context["user"], "ignore_auth": True}
+        toolkit.get_action('organization_member_create')(ignore_auth_context, org_member_dict)
+    except toolkit.ValidationError:
+        log.error(f"Failed to add newly created user: {created_user['name']} to org: {default_org_name}. "
+                  f"User account got created successfully.")
+    return created_user
 
 
 def _record_dataset_duplication(dataset_id, new_dataset_id, context):

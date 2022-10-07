@@ -19,6 +19,17 @@ The following key features are provided by this extension:
 - Changes to CKAN auth, to enable all users to be members of one organisation, but only edit their own datasets or the datasets they are collaborators on. The reason for this change is that the ckanext-blob-storage and ckanext-authz-service extensions are tightly coupled with the organisation model.
 
 
+## Configuration
+
+You can configure the bahaviour of this extension by adding this to the ckan production.ini file:
+
+```ini
+# The name of organization all newly created users will be added as editors to
+# to be able to create datasets in the system. Defaults to 'spectrum'
+ckanext.spectrum.default_organization = spectrum
+
+```
+
 
 ## Installation
 
