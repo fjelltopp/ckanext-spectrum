@@ -25,6 +25,11 @@ def mock_random_username():
         yield mock_random_username
 
 
+@pytest.fixture
+def spectrum_org():
+    return factories.Organization(name="spectrum")
+
+
 @pytest.mark.usefixtures('clean_db', 'with_plugins')
 class TestCreateUser():
 
@@ -64,8 +69,7 @@ class TestCreateUser():
         assert len(generated_password) > 30
         assert zxcvbn(generated_password)['score'] == 4
 
-    def test_newly_created_user_is_org_editor(self):
-        spectrum_org = factories.Organization(name="spectrum")
+    def test_new_user_can_create_datasets(self, spectrum_org):
         user = call_action(
             'user_create',
             email='test@test.org'
@@ -81,9 +85,7 @@ class TestCreateUser():
         )
         assert user['email'] == 'test@test.org'
 
-
-
-    def test_integration(self):
+    def test_integration(self, spectrum_org):
         response = call_action(
             'user_create',
             email='test@test.org'
