@@ -50,7 +50,7 @@ def user_create(next_action, context, data_dict):
 
     created_user = next_action(context, data_dict)
 
-    default_org_name = 'spectrum'
+    default_org_name = toolkit.config.get('ckanext.spectrum.default_organization', 'spectrum')
     org_member_dict = {'id': default_org_name, 'username': created_user['name'], 'role': 'editor'}
     try:
         ignore_auth_context = {"user": context["user"], "ignore_auth": True}
