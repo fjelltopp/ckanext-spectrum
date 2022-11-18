@@ -6,6 +6,9 @@ import random
 
 log = logging.getLogger(__name__)
 
+allowed_package_search_params = {"q", "fq", "fq_list", "include_drafts", "include_private",
+                                 "use_default_schema"}
+
 
 def dataset_duplicate(context, data_dict):
     dataset_id_or_name = toolkit.get_or_bust(data_dict, 'id')
@@ -59,6 +62,52 @@ def user_create(next_action, context, data_dict):
         log.error(f"Failed to add newly created user: {created_user['name']} to org: {default_org_name}. "
                   f"User account got created successfully.")
     return created_user
+
+
+def dataset_tag_patch(context, data_dict):
+    if 'tags' not in data_dict or not isinstance(data_dict['tags'], dict):
+        raise toolkit.ValidationError(toolkit._(
+            "Must specify 'tags' list with dict of tags for update in form "
+            "[{'old_tag_name1': 'new_tag_name1'}, {'old_tag_name2': 'new_tag_name2'}]"))
+
+    package_search_params = {}
+    for key in allowed_package_search_params:
+        if key in data_dict:
+            package_search_params[key] = data_dict[key]
+
+    datasets = toolkit.get_action('package_search')(context, package_search_params)
+
+    if _user_has_access_to_all_datasets(context, datasets):
+        _update_tags(context, datasets, data_dict['tags'])
+    else:
+        raise toolkit.NotAuthorized(toolkit._("User has no access for patching some datasets"))
+
+    return {'datasets_modified': datasets['count']}
+
+
+def _user_has_access_to_all_datasets(context, datasets):
+    for ds in datasets["results"]:
+        if not toolkit.check_access('package_patch', context, {"id": ds['id']}):
+            return False
+
+    return True
+
+
+def _update_tags(context, datasets, tags_to_be_replaced):
+    dataset_patch_action = toolkit.get_action('package_patch')
+
+    for ds in datasets["results"]:
+        final_tags = _prepare_final_tag_list(ds['tags'], tags_to_be_replaced)
+        dataset_patch_action(context, {'id': ds['id'], 'tags': final_tags})
+
+
+def _prepare_final_tag_list(original_tags, tags_to_be_replaced):
+    final_tags = []
+    for tag in original_tags:
+        tag_name = tag['name']
+        final_tags.append({"name": tags_to_be_replaced[tag_name] if tag_name in tags_to_be_replaced else tag_name})
+
+    return final_tags
 
 
 def _record_dataset_duplication(dataset_id, new_dataset_id, context):
