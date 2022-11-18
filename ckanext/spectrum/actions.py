@@ -67,8 +67,8 @@ def user_create(next_action, context, data_dict):
 def dataset_tag_patch(context, data_dict):
     if 'tags' not in data_dict or not isinstance(data_dict['tags'], dict):
         raise toolkit.ValidationError(toolkit._(
-            "Must specify 'tags' list with dict of tags for update in form "
-            "[{'old_tag_name1': 'new_tag_name1'}, {'old_tag_name2': 'new_tag_name2'}]"))
+            "Must specify 'tags' dict of tags for update in form "
+            "{'old_tag_name1': 'new_tag_name1', 'old_tag_name2': 'new_tag_name2'}"))
 
     package_search_params = {}
     for key in allowed_package_search_params:
@@ -102,7 +102,7 @@ def _restrict_datasets_to_those_with_tags(package_search_params, tags):
         original_fq = package_search_params['fq']
         package_search_params['fq'] = f"({original_fq}) AND ({fq_tag_restriction})"
     else:
-        package_search_params['fq'] = fq_tag_restriction
+        package_search_params['fq'] = f"({fq_tag_restriction})"
 
     return package_search_params
 
