@@ -75,6 +75,8 @@ def dataset_tag_patch(context, data_dict):
         if key in data_dict:
             package_search_params[key] = data_dict[key]
 
+    package_search_params = _restrict_datasets_to_those_with_tags(package_search_params, data_dict['tags'])
+
     datasets = toolkit.get_action('package_search')(context, package_search_params)
 
     if _user_has_access_to_all_datasets(context, datasets):
@@ -93,6 +95,18 @@ def _user_has_access_to_all_datasets(context, datasets):
     return True
 
 
+def _restrict_datasets_to_those_with_tags(package_search_params, tags):
+    fq_tag_restriction = _create_fq_tag_restriction(tags)
+
+    if 'fq' in package_search_params:
+        original_fq = package_search_params['fq']
+        package_search_params['fq'] = f"({original_fq}) AND ({fq_tag_restriction})"
+    else:
+        package_search_params['fq'] = fq_tag_restriction
+
+    return package_search_params
+
+
 def _update_tags(context, datasets, tags_to_be_replaced):
     dataset_patch_action = toolkit.get_action('package_patch')
 
@@ -108,6 +122,10 @@ def _prepare_final_tag_list(original_tags, tags_to_be_replaced):
         final_tags.append({"name": tags_to_be_replaced[tag_name] if tag_name in tags_to_be_replaced else tag_name})
 
     return final_tags
+
+
+def _create_fq_tag_restriction(tags):
+    return " OR ".join([f"tags:{key}" for key in tags])
 
 
 def _record_dataset_duplication(dataset_id, new_dataset_id, context):
