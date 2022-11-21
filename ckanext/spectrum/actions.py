@@ -61,6 +61,57 @@ def user_create(next_action, context, data_dict):
     return created_user
 
 
+def dataset_tag_replace(context, data_dict):
+    if 'tags' not in data_dict or not isinstance(data_dict['tags'], dict):
+        raise toolkit.ValidationError(toolkit._(
+            "Must specify 'tags' dict of tags for update in form "
+            "{'old_tag_name1': 'new_tag_name1', 'old_tag_name2': 'new_tag_name2'}"))
+
+    tags = data_dict.pop("tags")
+    package_search_params = _restrict_datasets_to_those_with_tags(data_dict, tags)
+
+    datasets = toolkit.get_action('package_search')(context, package_search_params).get('results', [])
+
+    _check_user_access_to_all_datasets(context, datasets)
+    _update_tags(context, datasets, tags)
+
+    return {'datasets_modified': len(datasets)}
+
+
+def _check_user_access_to_all_datasets(context, datasets):
+    for ds in datasets:
+        toolkit.check_access('package_patch', context, {"id": ds['id']})
+
+
+def _restrict_datasets_to_those_with_tags(package_search_params, tags):
+    fq_tag_restriction = " OR ".join([f"tags:{key}" for key in tags])
+
+    if 'fq' in package_search_params:
+        original_fq = package_search_params['fq']
+        package_search_params['fq'] = f"({original_fq}) AND ({fq_tag_restriction})"
+    else:
+        package_search_params['fq'] = f"({fq_tag_restriction})"
+
+    return package_search_params
+
+
+def _update_tags(context, datasets, tags_to_be_replaced):
+    dataset_patch_action = toolkit.get_action('package_patch')
+
+    for ds in datasets:
+        final_tags = _prepare_final_tag_list(ds['tags'], tags_to_be_replaced)
+        dataset_patch_action(context, {'id': ds['id'], 'tags': final_tags})
+
+
+def _prepare_final_tag_list(original_tags, tags_to_be_replaced):
+    final_tags = []
+    for tag in original_tags:
+        tag_name = tag['name']
+        final_tags.append({"name": tags_to_be_replaced[tag_name] if tag_name in tags_to_be_replaced else tag_name})
+
+    return final_tags
+
+
 def _record_dataset_duplication(dataset_id, new_dataset_id, context):
     # We should probably use activities to record duplication in CKAN 2.10
 
