@@ -75,7 +75,7 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         organisation, whilst ensuring they remain visible to the creator user.
 
         This function is extending the default parent class behaviour found
-        in ckan.lib.plugins.DefaultPermissionLabels.  We remove the label
+        in ckan.lib.plugins.DefaultPermissionLabels. We remove the label
         identifying the dataset as a member of the parent organisation, and
         replace it with the label identifying the creator user id.
         """
