@@ -1,4 +1,6 @@
 import pytest
+
+from ckan import logic
 from ckan.tests.helpers import call_action
 from ckanext.spectrum.actions import user_create, _record_dataset_duplication
 import ckan.tests.factories as factories
@@ -15,7 +17,7 @@ class TestDatasetTagPatch():
         d3 = create_dataset(["influenza", "covid19"], "d3")
 
         result = call_action(
-            'dataset_tag_patch',
+            'dataset_tag_replace',
             q='name:*',
             tags={'draft': 'consultations', 'consultations': 'final'}
         )
@@ -29,7 +31,7 @@ class TestDatasetTagPatch():
     def test_should_complain_when_no_tags_passed(self):
         with pytest.raises(toolkit.ValidationError) as ex:
             call_action(
-                'dataset_tag_patch',
+                'dataset_tag_replace',
                 q='name:*'
             )
         assert str(ex.value) == "None - {'message': \"Must specify 'tags' dict of tags for update in form " \
@@ -46,9 +48,7 @@ def create_dataset(tags_list, dataset_name):
         tags=tags,
         name=dataset_name
     )
-    resources = []
-    for i in range(3):
-        resources.append(factories.Resource(package_id=dataset['id']))
+
     return call_action('package_show', id=dataset['id'])
 
 

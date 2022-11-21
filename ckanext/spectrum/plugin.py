@@ -101,7 +101,7 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         return {
             'user_create': spectrum_actions.user_create,
             'dataset_duplicate': spectrum_actions.dataset_duplicate,
-            'dataset_tag_patch': spectrum_actions.dataset_tag_patch
+            'dataset_tag_replace': spectrum_actions.dataset_tag_replace
         }
 
     # IValidators

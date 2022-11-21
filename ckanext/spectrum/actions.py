@@ -64,35 +64,26 @@ def user_create(next_action, context, data_dict):
     return created_user
 
 
-def dataset_tag_patch(context, data_dict):
+def dataset_tag_replace(context, data_dict):
     if 'tags' not in data_dict or not isinstance(data_dict['tags'], dict):
         raise toolkit.ValidationError(toolkit._(
             "Must specify 'tags' dict of tags for update in form "
             "{'old_tag_name1': 'new_tag_name1', 'old_tag_name2': 'new_tag_name2'}"))
 
-    package_search_params = {}
-    for key in allowed_package_search_params:
-        if key in data_dict:
-            package_search_params[key] = data_dict[key]
+    tags = data_dict.pop("tags")
+    package_search_params = _restrict_datasets_to_those_with_tags(data_dict, tags)
 
-    package_search_params = _restrict_datasets_to_those_with_tags(package_search_params, data_dict['tags'])
+    datasets = toolkit.get_action('package_search')(context, package_search_params).get('results', [])
 
-    datasets = toolkit.get_action('package_search')(context, package_search_params)
+    _check_user_access_to_all_datasets(context, datasets)
+    _update_tags(context, datasets, tags)
 
-    if _user_has_access_to_all_datasets(context, datasets):
-        _update_tags(context, datasets, data_dict['tags'])
-    else:
-        raise toolkit.NotAuthorized(toolkit._("User has no access for patching some datasets"))
-
-    return {'datasets_modified': datasets['count']}
+    return {'datasets_modified': len(datasets)}
 
 
-def _user_has_access_to_all_datasets(context, datasets):
-    for ds in datasets["results"]:
-        if not toolkit.check_access('package_patch', context, {"id": ds['id']}):
-            return False
-
-    return True
+def _check_user_access_to_all_datasets(context, datasets):
+    for ds in datasets:
+        toolkit.check_access('package_patch', context, {"id": ds['id']})
 
 
 def _restrict_datasets_to_those_with_tags(package_search_params, tags):
@@ -110,7 +101,7 @@ def _restrict_datasets_to_those_with_tags(package_search_params, tags):
 def _update_tags(context, datasets, tags_to_be_replaced):
     dataset_patch_action = toolkit.get_action('package_patch')
 
-    for ds in datasets["results"]:
+    for ds in datasets:
         final_tags = _prepare_final_tag_list(ds['tags'], tags_to_be_replaced)
         dataset_patch_action(context, {'id': ds['id'], 'tags': final_tags})
 
