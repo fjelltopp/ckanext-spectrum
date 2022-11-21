@@ -6,9 +6,6 @@ import random
 
 log = logging.getLogger(__name__)
 
-allowed_package_search_params = {"q", "fq", "fq_list", "include_drafts", "include_private",
-                                 "use_default_schema"}
-
 
 def dataset_duplicate(context, data_dict):
     dataset_id_or_name = toolkit.get_or_bust(data_dict, 'id')
@@ -87,7 +84,7 @@ def _check_user_access_to_all_datasets(context, datasets):
 
 
 def _restrict_datasets_to_those_with_tags(package_search_params, tags):
-    fq_tag_restriction = _create_fq_tag_restriction(tags)
+    fq_tag_restriction = " OR ".join([f"tags:{key}" for key in tags])
 
     if 'fq' in package_search_params:
         original_fq = package_search_params['fq']
@@ -113,10 +110,6 @@ def _prepare_final_tag_list(original_tags, tags_to_be_replaced):
         final_tags.append({"name": tags_to_be_replaced[tag_name] if tag_name in tags_to_be_replaced else tag_name})
 
     return final_tags
-
-
-def _create_fq_tag_restriction(tags):
-    return " OR ".join([f"tags:{key}" for key in tags])
 
 
 def _record_dataset_duplication(dataset_id, new_dataset_id, context):
