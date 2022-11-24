@@ -1,22 +1,22 @@
 import logging
 from collections import OrderedDict
+
+import ckanext.blob_storage.helpers as blobstorage_helpers
+
+import ckan.lib.uploader as uploader
+import ckan.logic.schema as schema
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
-import ckan.lib.uploader as uploader
-from ckan.views import _identify_user_default
-from ckan.authz import is_sysadmin
-import ckan.logic.schema as schema
-import ckanext.blob_storage.helpers as blobstorage_helpers
+import ckanext.spectrum.actions as spectrum_actions
+import ckanext.spectrum.authn as spectrum_authn
+import ckanext.spectrum.authz as spectrum_authz
+import ckanext.spectrum.upload as spectrum_upload
+import ckanext.spectrum.validators as spectrum_validators
 from ckan.lib.plugins import DefaultPermissionLabels
+from ckan.views import _identify_user_default
 from ckanext.spectrum.helpers import (
     get_dataset_from_id, get_facet_items_dict
 )
-import ckanext.spectrum.authz as spectrum_authz
-import ckanext.spectrum.authn as spectrum_authn
-import ckanext.spectrum.upload as spectrum_upload
-import ckanext.spectrum.actions as spectrum_actions
-import ckanext.spectrum.validators as spectrum_validators
-
 
 log = logging.getLogger(__name__)
 
@@ -100,7 +100,8 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
     def get_actions(self):
         return {
             'user_create': spectrum_actions.user_create,
-            'dataset_duplicate': spectrum_actions.dataset_duplicate
+            'dataset_duplicate': spectrum_actions.dataset_duplicate,
+            'package_create': spectrum_actions.package_create
         }
 
     # IValidators
