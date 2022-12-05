@@ -21,7 +21,6 @@ def dataset():
     return call_action('package_show', id=dataset['id'])
 
 
-@pytest.mark.ckan_config('ckan.plugins', "spectrum scheming_datasets")
 @pytest.mark.usefixtures('clean_db', 'with_plugins')
 class TestDatasetDuplicate():
 

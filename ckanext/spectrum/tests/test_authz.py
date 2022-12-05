@@ -46,7 +46,6 @@ def datasets(organisation, users):
     ]
 
 
-@pytest.mark.ckan_config("ckan.plugins", "spectrum scheming_datasets")
 @pytest.mark.usefixtures("clean_db", "with_plugins")
 class TestAuth():
 

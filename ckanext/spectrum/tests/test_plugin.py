@@ -5,7 +5,6 @@ from ckan.tests.helpers import call_action
 from ckanext.spectrum.tests import get_context
 
 
-@pytest.mark.ckan_config('ckan.plugins', "spectrum scheming_datasets")
 @pytest.mark.usefixtures('clean_db', 'with_plugins')
 class TestPrivateDatasetActivities():
 

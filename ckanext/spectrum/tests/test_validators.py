@@ -1,11 +1,11 @@
-import pytest
 import mock
-from ckan.tests.helpers import call_action
-from ckan.plugins.toolkit import ValidationError
+import pytest
+
 import ckan.tests.factories as factories
+from ckan.plugins.toolkit import ValidationError
+from ckan.tests.helpers import call_action
 
 
-@pytest.mark.ckan_config("ckan.plugins", "spectrum scheming_datasets")
 @pytest.mark.usefixtures("clean_db", "clean_index", "with_plugins")
 class TestAutoGenerateNameFromTitle(object):
 
@@ -59,6 +59,7 @@ class TestAutoGenerateNameFromTitle(object):
             call_action("package_create", type="auto-generate-name-from-title")
 
 
+@pytest.mark.ckan_config("ckan.plugins", "spectrum")
 @pytest.mark.usefixtures("clean_db", 'with_plugins')
 class TestUserIDValidator(object):
 

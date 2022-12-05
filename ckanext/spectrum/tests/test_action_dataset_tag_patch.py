@@ -5,7 +5,6 @@ from ckan.plugins import toolkit
 from ckan.tests.helpers import call_action
 
 
-@pytest.mark.ckan_config('ckan.plugins', "spectrum scheming_datasets")
 @pytest.mark.usefixtures('clean_db', 'with_plugins')
 class TestDatasetTagPatch():
 

@@ -10,12 +10,11 @@ def organization():
     return factories.Organization()
 
 
-@pytest.mark.ckan_config('ckan.plugins', "spectrum scheming_datasets")
 @pytest.mark.usefixtures('clean_db', 'with_plugins')
 class TestPackageCreate():
 
     def test_should_complain_with_exception_when_dataset_type_invalid(self, organization):
-        exception_message = "{'message': \"Type baad-type is invalid, valid types are: " \
+        exception_message = "{'message': \"Type 'baad-type' is invalid, valid types are: " \
                                "'auto-generate-name-from-title, dataset'\""
         with pytest.raises(toolkit.ValidationError, match=exception_message) as e:
             call_action('package_create', name="some-name", type="baad-type", owner_org=organization['name'],

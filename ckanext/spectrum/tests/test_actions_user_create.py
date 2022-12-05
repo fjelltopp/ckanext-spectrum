@@ -1,11 +1,11 @@
-import pytest
 import mock
+import pytest
 from zxcvbn import zxcvbn
+
+import ckan.tests.factories as factories
 from ckan.tests.helpers import call_action
 from ckanext.spectrum.actions import user_create
-import ckan.tests.factories as factories
 from ckanext.spectrum.tests import get_context
-
 
 DUMMY_PASSWORD = '01234567890123456789012345678901'
 DUMMY_USERNAME = 'dummy-123'
@@ -30,6 +30,7 @@ def spectrum_org():
     return factories.Organization(name="spectrum")
 
 
+@pytest.mark.ckan_config('ckan.plugins', "spectrum")
 @pytest.mark.usefixtures('clean_db', 'with_plugins')
 class TestCreateUser():
 

@@ -35,14 +35,12 @@ def package_create(next_action, context, data_dict):
     dataset_type = data_dict.get('type', '')
 
     valid_types = toolkit.get_action("scheming_dataset_schema_list")(context, {})
-    valid_types_list = ", ".join(valid_types)
-
-    if 'dataset' not in valid_types_list:
-        valid_types_list += ", dataset"
+    if 'dataset' not in valid_types:
+        valid_types.append("dataset")
 
     if dataset_type:
         if dataset_type not in valid_types:
-            raise toolkit.ValidationError(f"Type {dataset_type} is invalid, valid types are: '{valid_types_list}'")
+            raise toolkit.ValidationError(f"Type '{dataset_type}' is invalid, valid types are: '{', '.join(valid_types)}'")
 
     return next_action(context, data_dict)
 
