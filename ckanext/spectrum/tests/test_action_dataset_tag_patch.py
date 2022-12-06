@@ -1,11 +1,8 @@
 import pytest
 
-from ckan import logic
-from ckan.tests.helpers import call_action
-from ckanext.spectrum.actions import user_create, _record_dataset_duplication
 import ckan.tests.factories as factories
-from ckanext.spectrum.tests import get_context
 from ckan.plugins import toolkit
+from ckan.tests.helpers import call_action
 
 
 @pytest.mark.usefixtures('clean_db', 'with_plugins')

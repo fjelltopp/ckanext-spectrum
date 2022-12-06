@@ -1,8 +1,9 @@
-import ckan.plugins.toolkit as toolkit
-import secrets
 import logging
-import re
 import random
+import re
+import secrets
+
+import ckan.plugins.toolkit as toolkit
 
 log = logging.getLogger(__name__)
 
@@ -28,6 +29,20 @@ def dataset_duplicate(context, data_dict):
 
     return toolkit.get_action('package_show')(context, {'id': duplicate_dataset['id']})
 
+
+@toolkit.chained_action
+def package_create(next_action, context, data_dict):
+    dataset_type = data_dict.get('type', '')
+
+    valid_types = toolkit.get_action("scheming_dataset_schema_list")(context, {})
+    if 'dataset' not in valid_types:
+        valid_types.append("dataset")
+
+    if dataset_type:
+        if dataset_type not in valid_types:
+            raise toolkit.ValidationError(f"Type '{dataset_type}' is invalid, valid types are: '{', '.join(valid_types)}'")
+
+    return next_action(context, data_dict)
 
 @toolkit.chained_action
 def user_create(next_action, context, data_dict):

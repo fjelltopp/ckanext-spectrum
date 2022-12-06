@@ -1,10 +1,11 @@
 import pytest
+
 from ckan.tests import factories
 from ckan.tests.helpers import call_action
 from ckanext.spectrum.tests import get_context
 
 
-@pytest.mark.usefixtures("clean_db")
+@pytest.mark.usefixtures('clean_db', 'with_plugins')
 class TestPrivateDatasetActivities():
 
     def test_activity_is_created_when_creating_private_dataset(self):

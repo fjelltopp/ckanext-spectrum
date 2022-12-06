@@ -1,8 +1,9 @@
 import pytest
+
+from ckan.plugins import toolkit
 from ckan.tests import factories
 from ckan.tests.helpers import call_auth, call_action
 from ckanext.spectrum.tests import get_context
-from ckan.plugins import toolkit
 
 
 @pytest.fixture
@@ -29,26 +30,23 @@ def datasets(organisation, users):
     return [
         factories.Dataset(
             owner_org=organisation['id'],
-            type='spectrum',
             private=True,
             user=users[0]
         ),
         factories.Dataset(
             owner_org=organisation['id'],
-            type='spectrum',
             private=True,
             user=users[1]
         ),
         factories.Dataset(
             owner_org=organisation['id'],
-            type='spectrum',
             private=False,
             user=users[1]
         )
     ]
 
 
-@pytest.mark.usefixtures("clean_db")
+@pytest.mark.usefixtures("clean_db", "with_plugins")
 class TestAuth():
 
     def test_users_cant_see_private_datasets(self, users, datasets):

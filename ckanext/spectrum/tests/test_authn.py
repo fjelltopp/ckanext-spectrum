@@ -1,9 +1,11 @@
 import pytest
+
 import ckan.plugins.toolkit as toolkit
 from ckan.tests import factories
 
 
-@pytest.mark.usefixtures("clean_db")
+@pytest.mark.ckan_config('ckan.plugins', "spectrum scheming_datasets")
+@pytest.mark.usefixtures('clean_db', 'with_plugins')
 class TestSysadminsOnlyCanAccessAPI():
 
     def test_unregistered_user_can_access_home(self, app):
@@ -50,7 +52,7 @@ class TestSysadminsOnlyCanAccessAPI():
         }
 
 
-@pytest.mark.usefixtures("clean_db")
+@pytest.mark.usefixtures('clean_db', 'with_plugins')
 class TestSubstituteUser():
 
     def test_error_raised_for_non_sysadmin_user(self, app):
