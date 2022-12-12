@@ -4,6 +4,7 @@ import re
 import secrets
 
 import ckan.plugins.toolkit as toolkit
+from ckan.plugins.toolkit import ValidationError, _
 
 log = logging.getLogger(__name__)
 
@@ -44,36 +45,60 @@ def package_create(next_action, context, data_dict):
 
     return next_action(context, data_dict)
 
+
 @toolkit.chained_action
 def user_create(next_action, context, data_dict):
-    """
-    Autogenerates a password and username (if password or username is not provided).
-    """
-
     if not data_dict.get('password'):
         data_dict['password'] = secrets.token_urlsafe(32)
 
-    if data_dict.get('name'):
-        return next_action(context, data_dict)
+    if not data_dict.get('name'):
+        if not data_dict.get('email'):
+            raise toolkit.ValidationError(toolkit._("Must specify either a name or an email"))
+        else:
+            email = data_dict['email']
+            username = _get_random_username_from_email(email, context['model'])
+            data_dict['name'] = username
 
-    if not data_dict.get('email'):
-        raise toolkit.ValidationError(toolkit._("Must specify either a name or an email"))
-
-    email = data_dict['email']
-    username = _get_random_username_from_email(email, context['model'])
-    data_dict['name'] = username
+    check_id_is_unique(context, data_dict)
 
     created_user = next_action(context, data_dict)
 
+    assign_user_to_default_organisation(context, created_user)
+
+    return created_user
+
+
+def assign_user_to_default_organisation(context, created_user):
     default_org_name = toolkit.config.get('ckanext.spectrum.default_organization', 'spectrum')
     org_member_dict = {'id': default_org_name, 'username': created_user['name'], 'role': 'editor'}
+
     try:
         ignore_auth_context = {"user": context["user"], "ignore_auth": True}
         toolkit.get_action('organization_member_create')(ignore_auth_context, org_member_dict)
     except toolkit.ValidationError:
         log.error(f"Failed to add newly created user: {created_user['name']} to org: {default_org_name}. "
                   f"User account got created successfully.")
-    return created_user
+
+
+def check_id_is_unique(context, data_dict):
+    """
+    Validate a new user id.
+
+    The form of this validator is taken from the ckan core validator:
+        user_name_validator
+    """
+
+    if 'id' in data_dict:
+        new_user_id = data_dict['id']
+        model = context['model']
+
+        if not isinstance(new_user_id, str):
+            raise ValidationError({'id': [_('User IDs must be strings')]})
+
+        user = model.User.get(new_user_id)
+
+        if user is not None:
+            raise ValidationError(_('That user ID is not available.'))
 
 
 def dataset_tag_replace(context, data_dict):

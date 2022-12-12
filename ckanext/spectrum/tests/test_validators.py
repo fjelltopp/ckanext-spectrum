@@ -1,3 +1,5 @@
+import re
+
 import mock
 import pytest
 
@@ -78,32 +80,49 @@ class TestAutoGenerateNameFromTitle(object):
 
 @pytest.mark.ckan_config("ckan.plugins", "spectrum")
 @pytest.mark.usefixtures("clean_db", 'with_plugins')
-class TestUserIDValidationRules(object):
+class TestUserIDAndNameValidation(object):
 
-    def test_when_user_id_is_not_unique_it_changes_into_random_id(self, user_dict, sysadmin_context):
+    def test_user_can_be_updated(self, user_dict, sysadmin_context):
+        user = factories.User(id='test-id')
+        user['email'] = "newemail@test.org"
+        assert call_action('user_update', **user)
+
+    def test_user_id_uniqueness(self, user_dict, sysadmin_context):
         user = call_action("user_create", context=sysadmin_context, **user_dict)
         assert user["id"] == "some_id"
 
         user_dict["name"] = "some-other-name"
-        user2 = call_action("user_create", context=sysadmin_context, **user_dict)
+        with pytest.raises(ValidationError, match="ID is not available"):
+            call_action("user_create", context=sysadmin_context, **user_dict)
 
-        assert user2["id"] != "some_id"
-
-    def test_when_user_id_is_same_as_other_username_it_changes_into_random_id(self, user_dict, sysadmin_context):
+    def test_user_name_uniqueness(self, user_dict, sysadmin_context):
+        user_dict.pop('id')
         user = call_action("user_create", context=sysadmin_context, **user_dict)
         assert user["name"] == "some_name"
 
+        with pytest.raises(ValidationError, match=re.escape("None - {'name': ['That login name is not available.']}")):
+            call_action("user_create", context=sysadmin_context, **user_dict)
+
+    def test_id_cannot_match_existing_username(self, user_dict, sysadmin_context):
+        user = call_action("user_create", **user_dict)
+        assert user["name"] == "some_name"
+
         user_dict["id"] = "some_name"
-        user_dict["name"] = "some-other-name"
-        user2 = call_action("user_create", context=sysadmin_context, **user_dict)
+        with pytest.raises(ValidationError, match="ID is not available"):
+            call_action("user_create", context=sysadmin_context, **user_dict)
 
-        assert user2["id"] != "some_id"
-
-    def test_when_user_name_is_same_as_other_id_an_error_is_thrown(self, user_dict, sysadmin_context):
+    def test_name_cannot_match_existing_user_id(self, user_dict, sysadmin_context):
         user = call_action("user_create", context=sysadmin_context, **user_dict)
         assert user["id"] == "some_id"
 
-        user_dict["id"] = "some_other_id"
+        user_dict.pop('id')
         user_dict["name"] = "some_id"
-        with pytest.raises(ValidationError, match="That login name is not available"):
+        with pytest.raises(ValidationError, match=re.escape("None - {'name': ['That login name is not available.']}")):
             call_action("user_create", **user_dict)
+
+    def test_can_create_user_with_same_id_and_name(self, sysadmin_context, user_dict):
+        user_dict['name'] = "some_id"
+
+        user = call_action("user_create", context=sysadmin_context, **user_dict)
+        assert user["id"] == "some_id"
+        assert user["name"] == "some_id"
