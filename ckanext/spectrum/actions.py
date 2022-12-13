@@ -54,10 +54,9 @@ def user_create(next_action, context, data_dict):
     if not data_dict.get('name'):
         if not data_dict.get('email'):
             raise toolkit.ValidationError(toolkit._("Must specify either a name or an email"))
-        else:
-            email = data_dict['email']
-            username = _get_random_username_from_email(email, context['model'])
-            data_dict['name'] = username
+        email = data_dict['email']
+        username = _get_random_username_from_email(email, context['model'])
+        data_dict['name'] = username
 
     check_id_is_unique(context, data_dict)
 
