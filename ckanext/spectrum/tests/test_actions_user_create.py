@@ -35,14 +35,16 @@ def spectrum_org():
 class TestCreateUser():
 
     def test_unit_without_autogeneration(self, mock_token_urlsafe):
-        next_action = mock.Mock()
+        user = factories.User()
+        next_action = mock.Mock(return_value=user)
+        context = {'user': user}
         data_dict = {
             'name': 'test_user',
             'email': 'test@test.org',
             'password': 'password'
         }
-        user_create(next_action, {}, data_dict)
-        next_action.assert_called_once_with({}, data_dict)
+        user_create(next_action, context, data_dict)
+        next_action.assert_called_once_with(context, data_dict)
 
     def test_unit_with_autogeneration(self, mock_token_urlsafe, mock_random_username):
         user = factories.User()
@@ -60,12 +62,14 @@ class TestCreateUser():
         next_action.assert_called_once_with(context, expected_data_dict)
 
     def test_auto_generated_password_is_strong(self):
-        next_action = mock.Mock()
+        user = factories.User()
+        next_action = mock.Mock(return_value=user)
+        context = {'user': user}
         data_dict = {
             'name': 'test_user',
             'email': 'test@test.org'
         }
-        user_create(next_action, {}, data_dict)
+        user_create(next_action, context, data_dict)
         generated_password = next_action.call_args[0][1]['password']
         assert len(generated_password) > 30
         assert zxcvbn(generated_password)['score'] == 4

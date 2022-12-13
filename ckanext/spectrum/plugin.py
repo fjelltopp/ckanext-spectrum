@@ -108,8 +108,7 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
     # IValidators
     def get_validators(self):
         return {
-            'auto_generate_name_from_title': spectrum_validators.generate_name_from_title,
-            'user_id_validator': spectrum_validators.user_id_validator
+            'auto_generate_name_from_title': spectrum_validators.generate_name_from_title
         }
 
     # IPackageContoller
@@ -152,9 +151,8 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
 
 def alter_user_schema(default_user_schema):
     @schema.validator_args
-    def spectrum_user_schema(email_is_unique, user_id_validator):
+    def spectrum_user_schema(email_is_unique):
         spectrum_user_schema = default_user_schema()
-        spectrum_user_schema['id'].append(user_id_validator)
         spectrum_user_schema['email'].remove(email_is_unique)
         return spectrum_user_schema
     return spectrum_user_schema
