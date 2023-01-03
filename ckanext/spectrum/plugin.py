@@ -130,7 +130,7 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         username or user id of another CKAN user.
         """
 
-        if toolkit.request.path.startswith('/api/'):
+        if toolkit.request.path.startswith('/api/') or ('/download/' in toolkit.request.path):
             # Private import is only way to set g.userobj using core CKAN.
             _identify_user_default()
 
