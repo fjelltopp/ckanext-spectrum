@@ -43,3 +43,22 @@ class TestPrivateDatasetActivities():
             id=private_dataset['id']
         )
         assert len(activity_stream) == 1
+
+    def test_activity_is_created_when_deleting_private_dataset(self):
+        user = factories.User()
+        private_dataset = factories.Dataset(
+            private=True,
+            owner_org=factories.Organization()['id'],
+            creator_user_id=user['id']
+        )
+        call_action(
+            'package_delete',
+            get_context(user['name']),
+            id=private_dataset['id']
+        )
+        activity_stream = call_action(
+            'package_activity_list',
+            get_context(user['name']),
+            id=private_dataset['id']
+        )
+        assert len(activity_stream) == 1
