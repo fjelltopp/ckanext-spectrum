@@ -13,7 +13,6 @@ import ckanext.spectrum.authz as spectrum_authz
 import ckanext.spectrum.upload as spectrum_upload
 import ckanext.spectrum.validators as spectrum_validators
 from ckan.lib.plugins import DefaultPermissionLabels
-from ckan.views import _identify_user_default
 from ckanext.spectrum.helpers import (
     get_dataset_from_id, get_facet_items_dict
 )
@@ -136,10 +135,8 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         """
 
         if toolkit.request.path.startswith('/api/') or ('/download/' in toolkit.request.path):
-            # Private import is only way to set g.userobj using core CKAN.
-            _identify_user_default()
 
-            if not toolkit.g.userobj or not toolkit.g.userobj.sysadmin:
+            if not toolkit.current_user or not toolkit.current_user.sysadmin:
                 return {
                     "success": False,
                     "error": {
