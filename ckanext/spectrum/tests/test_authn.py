@@ -1,5 +1,4 @@
 import pytest
-
 import ckan.plugins.toolkit as toolkit
 from ckan.tests import factories
 
@@ -8,15 +7,39 @@ from ckan.tests import factories
 @pytest.mark.usefixtures('clean_db', 'with_plugins')
 class TestSysadminsOnlyCanAccessAPI():
 
+    api_endpoints_to_test = [
+        ('user_show'),
+        ('package_list'),
+        ('package_search'),
+        ('user_list'),
+        ('dataset_duplicate'),
+        ('user_create')
+    ]
+
     def test_unregistered_user_can_access_home(self, app):
         # Regression test: this feature was found to block access to homepage
         response = app.get('/')
         assert response.status_code == 200
 
-    def test_error_raised_for_non_sysadmin_user(self, app):
+    @pytest.mark.parametrize('action', api_endpoints_to_test)
+    def test_api_endpoints_inaccessible_to_anonymous_users(self, app, action):
+        response = app.get(
+            toolkit.url_for('api.action', ver=3, logic_function=action)
+        )
+        assert response.status_code == 403
+        assert response.json == {
+            'success': False,
+            'error': {
+                '__type': 'Not Authorized',
+                'message': "Must be a system administrator."
+            }
+        }
+
+    @pytest.mark.parametrize('action', api_endpoints_to_test)
+    def test_api_endpoints_inaccessible_to_regular_users(self, app, action):
         user = factories.User(sysadmin=False)
         response = app.get(
-            toolkit.url_for('api.action', ver=3, logic_function='package_list'),
+            toolkit.url_for('api.action', ver=3, logic_function=action),
             headers={
                 'Authorization': user['apikey']
             }
@@ -30,26 +53,16 @@ class TestSysadminsOnlyCanAccessAPI():
             }
         }
 
-    @pytest.mark.parametrize('action', [
-        ('user_show'),
-        ('package_list'),
-        ('package_search'),
-        ('user_list'),
-        ('dataset_duplicate'),
-        ('user_create')
-    ])
-    def test_api_endpoints_require_registered_user(self, app, action):
+    @pytest.mark.parametrize('action', api_endpoints_to_test)
+    def test_api_endpoints_accessible_to_sysadmin_users(self, app, action):
+        user = factories.User(sysadmin=True)
         response = app.get(
-            toolkit.url_for('api.action', ver=3, logic_function=action)
-        )
-        assert response.status_code == 403
-        assert response.json == {
-            'success': False,
-            'error': {
-                '__type': 'Not Authorized',
-                'message': "Must be a system administrator."
+            toolkit.url_for('api.action', ver=3, logic_function=action),
+            headers={
+                'Authorization': user['apikey']
             }
-        }
+        )
+        assert response.status_code == 200
 
 
 @pytest.mark.usefixtures('clean_db', 'with_plugins')
