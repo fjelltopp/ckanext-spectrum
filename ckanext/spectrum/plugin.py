@@ -4,7 +4,6 @@ from collections import OrderedDict
 import ckanext.blob_storage.helpers as blobstorage_helpers
 
 import ckan.lib.uploader as uploader
-import ckan.logic.schema as schema
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 import ckanext.spectrum.actions as spectrum_actions
@@ -47,8 +46,6 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         toolkit.add_template_directory(config_, "templates")
         toolkit.add_public_directory(config_, "public")
         toolkit.add_resource("assets", "spectrum")
-        if (schema.default_user_schema.__name__ != 'spectrum_user_schema'):
-            schema.default_user_schema = alter_user_schema(schema.default_user_schema)
 
     # IFacets
     def dataset_facets(self, facet_dict, package_type):
@@ -135,8 +132,8 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         """
 
         if toolkit.request.path.startswith('/api/') or ('/download/' in toolkit.request.path):
-
-            if not toolkit.current_user or not toolkit.current_user.sysadmin:
+            user_is_sysadmin = getattr(toolkit.current_user, 'sysadmin', False)
+            if not user_is_sysadmin:
                 return {
                     "success": False,
                     "error": {
@@ -149,12 +146,3 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
 
             if substitute_user_id:
                 return spectrum_authn.substitute_user(substitute_user_id)
-
-
-def alter_user_schema(default_user_schema):
-    @schema.validator_args
-    def spectrum_user_schema(email_is_unique):
-        spectrum_user_schema = default_user_schema()
-        spectrum_user_schema['email'].remove(email_is_unique)
-        return spectrum_user_schema
-    return spectrum_user_schema
