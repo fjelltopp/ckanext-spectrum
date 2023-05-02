@@ -3,6 +3,7 @@ import logging
 from giftless_client import LfsClient
 from werkzeug.datastructures import FileStorage as FlaskFileStorage
 import ckanext.blob_storage.helpers as blobstorage_helpers
+from ckanext.activity.model import Activity
 import ckan.plugins.toolkit as toolkit
 
 
@@ -13,8 +14,9 @@ def add_activity(context, data_dict, activity_type):
     user = context['model'].User.by_name(context['user'])
     user_id = getattr(user, 'id', "UnknownUser")
     package = context.get("package", context['model'].Package.get(data_dict["name"]))
-    activity = package.activity_stream_item(activity_type, user_id)
+    activity = Activity.activity_stream_item(package, activity_type, user_id)
     context['session'].add(activity)
+    context["session"].commit()
 
 
 def handle_giftless_uploads(context, resource, current=None):
