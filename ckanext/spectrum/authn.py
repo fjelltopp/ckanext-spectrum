@@ -15,5 +15,4 @@ def substitute_user(substitute_user_id):
             }
         }, 400
 
-    toolkit.g.user = substitute_user_obj.name
-    toolkit.g.userobj = substitute_user_obj
+    toolkit.login_user(substitute_user_obj)
