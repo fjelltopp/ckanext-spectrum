@@ -37,11 +37,11 @@ class TestSysadminsOnlyCanAccessAPI():
 
     @pytest.mark.parametrize('action', api_endpoints_to_test)
     def test_api_endpoints_inaccessible_to_regular_users(self, app, action):
-        token = factories.APIToken()['token']
+        user = factories.UserWithToken()
         response = app.get(
             toolkit.url_for('api.action', ver=3, logic_function=action),
             headers={
-                'Authorization': token
+                'Authorization': user['token']
             }
         )
         assert response.status_code == 403
@@ -55,13 +55,12 @@ class TestSysadminsOnlyCanAccessAPI():
 
     @pytest.mark.parametrize('action', api_endpoints_to_test)
     def test_api_endpoints_accessible_to_sysadmin_users(self, app, action):
-        user = factories.User(sysadmin=True)
-        token = factories.APIToken(user=user['id'])['token']
+        user = factories.UserWithToken(sysadmin=True)
 
         response = app.get(
             toolkit.url_for('api.action', ver=3, logic_function=action),
             headers={
-                'Authorization': token
+                'Authorization': user['token']
             }
         )
         assert response.status_code == 200
@@ -71,23 +70,22 @@ class TestSysadminsOnlyCanAccessAPI():
 class TestSubstituteUser():
 
     def test_error_raised_for_non_sysadmin_user(self, app):
-        token = factories.APIToken()['token']
+        user = factories.UserWithToken()
         response = app.get(
             toolkit.url_for('api.action', ver=3, logic_function='package_list'),
             headers={
-                'Authorization': token,
+                'Authorization': user['token'],
                 'CKAN-Substitute-User': 'fjelltopp_editor'
             }
         )
         assert response.status_code == 403
 
     def test_error_raised_for_invalid_substitute_user(self, app):
-        user = factories.User(sysadmin=True)
-        token = factories.APIToken(user=user['id'])['token']
+        user = factories.UserWithToken(sysadmin=True)
         response = app.get(
             toolkit.url_for('api.action', ver=3, logic_function='package_list'),
             headers={
-                'Authorization': token,
+                'Authorization': user['token'],
                 'CKAN-Substitute-User': 'non_existant_user'
             }
         )
@@ -103,8 +101,7 @@ class TestSubstituteUser():
 
     @pytest.mark.parametrize("user_field", ["id", "name"])
     def test_valid_substitute_user_request(self, app, user_field):
-        sysadmin_user = factories.User(sysadmin=True)
-        sysadmin_token = factories.APIToken(user=sysadmin_user['id'])['token']
+        sysadmin_user = factories.UserWithToken(sysadmin=True)
         substitute_user = factories.User()
         dataset = factories.Dataset()
         dataset_create_url = toolkit.url_for(
@@ -117,7 +114,7 @@ class TestSubstituteUser():
             dataset_create_url,
             json={'name': 'test-dataset'},
             headers={
-                'Authorization': sysadmin_token,
+                'Authorization': sysadmin_user['token'],
                 'CKAN-Substitute-User': substitute_user[user_field]
             }
         )
