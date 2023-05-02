@@ -108,16 +108,16 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         }
 
     # IPackageContoller
-    def after_delete(self, context, data_dict):
+    def after_dataset_delete(self, context, data_dict):
         package_data = toolkit.get_action('package_show')(context, data_dict)
         if package_data.get('private'):
             spectrum_upload.add_activity(context, package_data, "changed")
 
-    def after_update(self, context, data_dict):
+    def after_dataset_update(self, context, data_dict):
         if data_dict.get('private'):
             spectrum_upload.add_activity(context, data_dict, "changed")
 
-    def after_create(self, context, data_dict):
+    def after_dataset_create(self, context, data_dict):
         if data_dict.get('private'):
             spectrum_upload.add_activity(context, data_dict, "new")
 
