@@ -8,12 +8,12 @@ from ckan.tests import factories
 class TestSysadminsOnlyCanAccessAPI():
 
     api_endpoints_to_test = [
-        ('user_show'),
-        ('package_list'),
-        ('package_search'),
-        ('user_list'),
-        ('dataset_duplicate'),
-        ('user_create')
+        ('user_show', 200),
+        ('package_list', 200),
+        ('package_search', 200),
+        ('user_list', 200),
+        ('dataset_duplicate', 409),
+        ('user_create', 409)
     ]
 
     def test_unregistered_user_can_access_home(self, app):
@@ -53,17 +53,16 @@ class TestSysadminsOnlyCanAccessAPI():
             }
         }
 
-    @pytest.mark.parametrize('action', api_endpoints_to_test)
-    def test_api_endpoints_accessible_to_sysadmin_users(self, app, action):
+    @pytest.mark.parametrize('action, response_code', api_endpoints_to_test)
+    def test_api_endpoints_accessible_to_sysadmin_users(self, app, action, response_code):
         user = factories.UserWithToken(sysadmin=True)
-
-        response = app.get(
+        response = app.post(
             toolkit.url_for('api.action', ver=3, logic_function=action),
             headers={
                 'Authorization': user['token']
             }
         )
-        assert response.status_code == 200
+        assert response.status_code == response_code
 
 
 @pytest.mark.usefixtures('clean_db', 'with_plugins')
