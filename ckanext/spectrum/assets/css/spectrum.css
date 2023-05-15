@@ -64,6 +64,8 @@
 	margin: 5px 0;
 }
 
+/* Updates for bootstrap 5 */
+
 /* Menu button */
 .main-navbar ul li.active a{
 	background-color: #49338f !important;
@@ -77,7 +79,6 @@
 	background-color: #5daedf !important;
 }
 
-/* Updates for bootstrap 5 */
 
 /* mobile */
 @media only screen and (max-width: 768px) {
