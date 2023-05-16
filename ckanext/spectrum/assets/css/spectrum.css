@@ -67,16 +67,12 @@
 /* Updates for bootstrap 5 */
 
 /* Menu button */
-.main-navbar ul li.active a{
-	background-color: #49338f !important;
+.masthead .main-navbar ul li a:hover,
+.masthead .main-navbar ul li.active a {
+	background-color: #49338f;
 }
-
-.main-navbar ul li a:hover{
-	background-color: #49338f !important;
-}
-
-.main-navbar ul li a{
-	background-color: #5daedf !important;
+.masthead .main-navbar ul li a{
+	background-color: #5daedf;
 }
 
 
@@ -175,14 +171,21 @@ a.dropdown-item {
 /* Remove the separator in the dataset page */
 @media (min-width: 576px) {
 	.wrapper:before {
-		content: none !important;
+		content: none;
+	}
+}
+
+/* Hide the navbar */
+@media (max-width: 768px) {
+	.navbar {
+		flex-wrap: nowrap;
+		justify-content: flex-start;
 	}
 }
 
 .btn-primary {
-	background-color: #49338f !important;
+	background-color: #49338f;
 }
-
 
 /* Hide site search */
 @media only screen and (max-width: 992px) {
@@ -193,7 +196,7 @@ a.dropdown-item {
 
 /* Search panel */
 .homepage .module-search .search-form {
-	padding: 15px 20px 15px !important;
+	padding: 15px 20px 15px;
 }
 
 .img-responsive {
@@ -250,7 +253,7 @@ body {
 }
 
 .site-footer, .site-footer a, .site-footer .attribution p {
-    color: #ffffff !important;
+    color: #ffffff;
 }
 
 

@@ -3,3 +3,4 @@ spectrum-theme:
   output: ckanext-spectrum/%(version)s-spectrum.css
   contents:
     - css/spectrum.css
+    - css/navbar-expand.css
