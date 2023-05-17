@@ -2,5 +2,4 @@ spectrum-theme:
   filter: cssrewrite
   output: ckanext-spectrum/%(version)s-spectrum.css
   contents:
-    - css/spectrum-main.css
     - css/spectrum.css
