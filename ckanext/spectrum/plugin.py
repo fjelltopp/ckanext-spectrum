@@ -15,12 +15,14 @@ from ckan.lib.plugins import DefaultPermissionLabels
 from ckanext.spectrum.helpers import (
     get_dataset_from_id, get_facet_items_dict
 )
+from ckan.common import config_declaration
 
 log = logging.getLogger(__name__)
 
 
 class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
 
+    plugins.implements(plugins.IConfigurable)
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.IFacets, inherit=True)
     plugins.implements(plugins.ITemplateHelpers)
@@ -46,6 +48,15 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         toolkit.add_template_directory(config_, "templates")
         toolkit.add_public_directory(config_, "public")
         toolkit.add_resource("assets", "spectrum")
+
+    # IConfigurable
+    def configure(self, config):
+        """
+        Temporary fix to CKAN Github issue 7593.
+        https://github.com/ckan/ckan/issues/7593
+        This should be removed when the issue is resolved.
+        """
+        config_declaration.normalize(config)
 
     # IFacets
     def dataset_facets(self, facet_dict, package_type):
