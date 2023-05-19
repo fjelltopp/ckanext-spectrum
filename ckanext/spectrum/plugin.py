@@ -122,6 +122,8 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
     def after_dataset_delete(self, context, data_dict):
         package_data = toolkit.get_action('package_show')(context, data_dict)
         if package_data.get('private'):
+            package_data['state'] = 'deleted'
+            context['package'].state = 'deleted'
             spectrum_upload.add_activity(context, package_data, "changed")
 
     def after_dataset_update(self, context, data_dict):
