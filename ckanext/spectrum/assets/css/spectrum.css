@@ -169,18 +169,15 @@ a.dropdown-item {
 }
 
 
-/* Remove the separator in the dataset page */
-@media (min-width: 576px) {
-	.wrapper:before {
-		content: none;
-	}
-}
-
-/* Hide the navbar */
 @media (max-width: 768px) {
+	/* Hide the navbar */
 	.navbar {
 		flex-wrap: nowrap;
 		justify-content: flex-start;
+	}
+	/* Remove the separator in the dataset page */
+	.wrapper:before {
+		content: none;
 	}
 }
 
