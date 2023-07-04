@@ -4,7 +4,6 @@ from collections import OrderedDict
 import ckanext.blob_storage.helpers as blobstorage_helpers
 
 import ckan.lib.uploader as uploader
-import ckan.logic.schema as schema
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 import ckanext.spectrum.actions as spectrum_actions
@@ -13,16 +12,17 @@ import ckanext.spectrum.authz as spectrum_authz
 import ckanext.spectrum.upload as spectrum_upload
 import ckanext.spectrum.validators as spectrum_validators
 from ckan.lib.plugins import DefaultPermissionLabels
-from ckan.views import _identify_user_default
 from ckanext.spectrum.helpers import (
     get_dataset_from_id, get_facet_items_dict
 )
+from ckan.common import config_declaration
 
 log = logging.getLogger(__name__)
 
 
 class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
 
+    plugins.implements(plugins.IConfigurable)
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.IFacets, inherit=True)
     plugins.implements(plugins.ITemplateHelpers)
@@ -48,8 +48,15 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         toolkit.add_template_directory(config_, "templates")
         toolkit.add_public_directory(config_, "public")
         toolkit.add_resource("assets", "spectrum")
-        if (schema.default_user_schema.__name__ != 'spectrum_user_schema'):
-            schema.default_user_schema = alter_user_schema(schema.default_user_schema)
+
+    # IConfigurable
+    def configure(self, config):
+        """
+        Temporary fix to CKAN Github issue 7593.
+        https://github.com/ckan/ckan/issues/7593
+        This should be removed when the issue is resolved.
+        """
+        config_declaration.normalize(config)
 
     # IFacets
     def dataset_facets(self, facet_dict, package_type):
@@ -60,11 +67,11 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         return new_fd
 
     # IResourceController
-    def before_create(self, context, resource):
+    def before_resource_create(self, context, resource):
         spectrum_upload.handle_giftless_uploads(context, resource)
         return resource
 
-    def before_update(self, context, current, resource):
+    def before_resource_update(self, context, current, resource):
         spectrum_upload.handle_giftless_uploads(context, resource, current=current)
         return resource
 
@@ -112,16 +119,18 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         }
 
     # IPackageContoller
-    def after_delete(self, context, data_dict):
+    def after_dataset_delete(self, context, data_dict):
         package_data = toolkit.get_action('package_show')(context, data_dict)
         if package_data.get('private'):
+            package_data['state'] = 'deleted'
+            context['package'].state = 'deleted'
             spectrum_upload.add_activity(context, package_data, "changed")
 
-    def after_update(self, context, data_dict):
+    def after_dataset_update(self, context, data_dict):
         if data_dict.get('private'):
             spectrum_upload.add_activity(context, data_dict, "changed")
 
-    def after_create(self, context, data_dict):
+    def after_dataset_create(self, context, data_dict):
         if data_dict.get('private'):
             spectrum_upload.add_activity(context, data_dict, "new")
 
@@ -136,10 +145,8 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         """
 
         if toolkit.request.path.startswith('/api/') or ('/download/' in toolkit.request.path):
-            # Private import is only way to set g.userobj using core CKAN.
-            _identify_user_default()
-
-            if not toolkit.g.userobj or not toolkit.g.userobj.sysadmin:
+            user_is_sysadmin = getattr(toolkit.current_user, 'sysadmin', False)
+            if not user_is_sysadmin:
                 return {
                     "success": False,
                     "error": {
@@ -152,12 +159,3 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
 
             if substitute_user_id:
                 return spectrum_authn.substitute_user(substitute_user_id)
-
-
-def alter_user_schema(default_user_schema):
-    @schema.validator_args
-    def spectrum_user_schema(email_is_unique):
-        spectrum_user_schema = default_user_schema()
-        spectrum_user_schema['email'].remove(email_is_unique)
-        return spectrum_user_schema
-    return spectrum_user_schema
