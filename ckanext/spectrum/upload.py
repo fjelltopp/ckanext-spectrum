@@ -20,19 +20,8 @@ def add_activity(context, data_dict, activity_type):
 
 
 def handle_giftless_uploads(context, resource, current=None):
-
-    if _data_dict_is_resource(resource):
-        _giftless_upload(context, resource, current=current)
-        _update_resource_last_modified_date(resource, current=current)
-
-
-def _data_dict_is_resource(data_dict):
-    return not (
-        u'creator_user_id' in data_dict
-        or u'owner_org' in data_dict
-        or u'resources' in data_dict
-        or data_dict.get(u'type') == u'dataset'
-    )
+    _giftless_upload(context, resource, current=current)
+    _update_resource_last_modified_date(resource, current=current)
 
 
 def _giftless_upload(context, resource, current=None):

@@ -67,11 +67,11 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         return new_fd
 
     # IResourceController
-    def before_create(self, context, resource):
+    def before_resource_create(self, context, resource):
         spectrum_upload.handle_giftless_uploads(context, resource)
         return resource
 
-    def before_update(self, context, current, resource):
+    def before_resource_update(self, context, current, resource):
         spectrum_upload.handle_giftless_uploads(context, resource, current=current)
         return resource
 
