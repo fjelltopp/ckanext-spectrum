@@ -5,6 +5,8 @@ import secrets
 
 import ckan.plugins.toolkit as toolkit
 from ckan.plugins.toolkit import ValidationError, _
+from ckan.logic import NotFound
+
 
 log = logging.getLogger(__name__)
 
@@ -43,6 +45,19 @@ def package_create(next_action, context, data_dict):
         if dataset_type not in valid_types:
             raise toolkit.ValidationError(f"Type '{dataset_type}' is invalid, valid types are: '{', '.join(valid_types)}'")
 
+    return next_action(context, data_dict)
+
+
+@toolkit.chained_action
+def user_list(next_action, context, data_dict):
+    try:
+        user_from_id = toolkit.get_action('user_show')(
+            context,
+            {'id': data_dict.get('q', '')}
+        )
+        data_dict['q'] = user_from_id.get('name')
+    except toolkit.ObjectNotFound:
+        pass
     return next_action(context, data_dict)
 
 

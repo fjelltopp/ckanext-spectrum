@@ -106,6 +106,7 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
     # IActions
     def get_actions(self):
         return {
+            'user_list': spectrum_actions.user_list,
             'user_create': spectrum_actions.user_create,
             'dataset_duplicate': spectrum_actions.dataset_duplicate,
             'package_create': spectrum_actions.package_create,
