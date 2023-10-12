@@ -149,3 +149,17 @@ class TestAuth():
             id=datasets[0]['id'],
             user_id=users[1]['id']
         )
+
+    def test_collaborator_can_delete_self(self, users, datasets):
+        call_action(
+            'package_collaborator_create',
+            id=datasets[0]['id'],
+            user_id=users[1]['id'],
+            capacity='editor'
+        )
+        assert call_auth(
+            'package_collaborator_delete',
+            get_context(users[1]),
+            id=datasets[0]['id'],
+            user_id=users[1]['id']
+        )
