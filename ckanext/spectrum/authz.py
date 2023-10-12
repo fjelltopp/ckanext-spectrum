@@ -16,9 +16,25 @@ def creators_manage_collaborators(next_auth, context, data_dict):
 
     if package.creator_user_id == user_obj.id:
         return {'success': True}
-
     else:
         return next_auth(context, data_dict)
+
+
+@toolkit.chained_auth_function
+def package_collaborator_delete(next_auth, context, data_dict):
+    """
+    Explicitly ensures that dataset collaborators can delete themselves.
+    """
+    model = context['model']
+    current_user = context['user']
+    requested_user = toolkit.get_or_bust(data_dict, 'user_id')
+    current_user_obj = model.User.get(current_user)
+    requested_user_obj = model.User.get(requested_user)
+
+    if current_user_obj.id == requested_user_obj.id:
+        return {'success': True}
+    else:
+        return creators_manage_collaborators(next_auth, context, data_dict)
 
 
 @toolkit.auth_disallow_anonymous_access
