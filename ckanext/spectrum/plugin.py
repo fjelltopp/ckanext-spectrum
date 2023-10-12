@@ -99,8 +99,8 @@ class SpectrumPlugin(plugins.SingletonPlugin, DefaultPermissionLabels):
         return {
             'package_update': spectrum_authz.package_update,
             'package_collaborator_create': spectrum_authz.creators_manage_collaborators,
-            'package_collaborator_delete': spectrum_authz.creators_manage_collaborators,
-            'package_collaborator_list': spectrum_authz.creators_manage_collaborators
+            'package_collaborator_list': spectrum_authz.creators_manage_collaborators,
+            'package_collaborator_delete': spectrum_authz.package_collaborator_delete
         }
 
     # IActions
